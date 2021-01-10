@@ -1,8 +1,13 @@
 {
 	"name": "todotools",
 	"displayName": "ToDoTools",
+	"publisher": "grahampcharles",
 	"description": "Adds auxilary functions for taskpaper documents.",
 	"version": "0.0.1",
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/grahampcharles/VSCode-todotools.git"
+	},
 	"engines": {
 		"vscode": "^1.52.0"
 	},
@@ -14,12 +19,10 @@
 	],
 	"main": "./out/extension.js",
 	"contributes": {
-		"commands": [
-			{
-				"command": "todotools.copyDailyToToday",
-				"title": "ToDo Tools: Copy Daily Tasks to Today"
-			}
-		]
+		"commands": [{
+			"command": "todotools.copyDailyToToday",
+			"title": "ToDo Tools: Copy Daily Tasks to Today"
+		}]
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
