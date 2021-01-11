@@ -13,6 +13,7 @@ None.
 
 ## Development Pathway
 
+* Change command name to more generic name, like, updateRecurringTasks or something
 * Make only work on taskpaper documents.
 * Implement the "copy" using extension settings, something like this:
 
