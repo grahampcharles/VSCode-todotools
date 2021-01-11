@@ -1,16 +1,38 @@
-# todotools README
+# `todotools` README
 
-todotools adds some task list management shortcuts for Taskpaper documents.
+The `todotools` extension adds some task list management shortcuts for TaskPaper documents.
 
 ## Features
 
 **Copy Daily Tasks to Today**
 : This task will copy any tasks in a "Daily" section into a "Today" section, unless they are already there. This allows you to create daily tasks (e.g. "Feed the cat") without having to re-type them,
 
-
 ## Extension Settings
 
 None. 
+
+## Development Pathway
+
+* Make only work on taskpaper documents.
+* Implement the "copy" using extension settings, something like this:
+
+````
+  todotools.schedules : [
+    { 
+      fromFolder: 'Daily', 
+      toFolder: 'Today',
+      allowDuplicates: false, 
+    },
+    { 
+      fromFolder: 'Every Third Day', 
+      toFolder: 'Today',
+      icsPattern: ' ',
+      allowDuplicates: false, 
+    }
+  ]
+````
+
+The `icsPattern` idea refers to the calendar standard, which has a recurrence pattern rule (`RRULE`) that might come in useful.
 
 ## Known Issues
 
@@ -26,6 +48,10 @@ The document must have sections for "Daily" and "Today" in standard TaskPaper sy
 ````
 
 ## Release Notes
+
+### 0.0.2
+
+* Added a simple second recurrence section: "Every Third Day" 
 
 ### 0.0.1
 

@@ -13,63 +13,87 @@ export function activate(context: vscode.ExtensionContext) {
 	let disposable = vscode.commands.registerCommand('todotools.copyDailyToToday', () => {
 		// The code you place here will be executed every time your command is executed
 
-		// try to find the Daily: section
 		let textEditor = vscode.window.activeTextEditor;
 		if (textEditor) {
-			copySection(textEditor, "Daily", "Today");
-		}
 
+			// find the today line number
+			const todayLine = getSectionLineNumber(textEditor, "Today");
+			if (!(todayLine === undefined)) {   // no point going on if there's no Today section
+
+				// get the "Today" section
+				const today = getSection(textEditor, "Today");
+
+				// get the "Daily" section
+				var lines = getSection(textEditor, "Daily");
+
+				// how many days have passed since the beginning of time?	
+				const daysSinceTheBeginningOfTime = daysPassed(new Date(0), new Date());
+
+				// is this day divisible by 3?
+				if (daysSinceTheBeginningOfTime % 3 === 0) {
+					// add the "Every Third Day" section
+					lines = lines.concat(getSection(textEditor, "Every Third Day"));
+				}
+
+				// remove anything from the lines array that's already in the toLines array
+				// and unduplicate
+				lines = lines
+					.filter((v) => !today.includes(v))
+					.filter((v, i, a) => a.indexOf(v) === i);
+
+				if (lines.length > 0) {
+					// add a trailing item to ensure a terminal linefeed
+					lines.push('');
+				}
+
+				// insert the lines 
+				textEditor.edit((selectedText) => {
+					selectedText.insert(new vscode.Position(todayLine + 1, 0),
+						lines.join('\r\n')
+					);
+				});
+			}
+		}
 	});
 
 	context.subscriptions.push(disposable);
 }
 
-export function copySection(editor: vscode.TextEditor, fromSection: string, toSection: string) {
+function daysPassed(dtBegin: Date, dtEnd: Date): number {
+	const differenceInTime = dtEnd.getTime() - dtBegin.getTime();
+	const millisecondsPerDay = 1000 * 3600 * 24;
+	return Math.ceil(differenceInTime / millisecondsPerDay);
+}
 
-	var fromLines: string[] = [];
-	const toLines: string[] = [];
-	var isInFromSection: Boolean = false;
-	var isInToSection: Boolean = false;
-	var toSectionLine: number = -1;
+function getSection(editor: vscode.TextEditor, fromSection: string): string[] {
+
+	var sectionLines: string[] = [];
+	var isInSection: Boolean = false;
 
 	for (let i = 0; i < editor.document.lineCount; i++) {
 
-		if (isSectionHead(editor.document.lineAt(i).text) === toSection) {
-			isInToSection = true;
-			isInFromSection = false;
-			toSectionLine = i + 1; // drop in new text below
-		} else if (isSectionHead(editor.document.lineAt(i).text) === fromSection) {
-			isInToSection = false;
-			isInFromSection = true;
+		if (isSectionHead(editor.document.lineAt(i).text) === fromSection) {
+			isInSection = true;
 		} else if (isSectionHead(editor.document.lineAt(i).text)) {
-			isInToSection = false;
-			isInFromSection = false;
+			isInSection = false;
 		} else if (/\S/.test(editor.document.lineAt(i).text)) {
 			// something other than whitespace?
-			if (isInFromSection) { fromLines.push(editor.document.lineAt(i).text); }
-			if (isInToSection) { toLines.push(editor.document.lineAt(i).text); }
+			if (isInSection) { sectionLines.push(editor.document.lineAt(i).text); }
 		}
 	}
 
-	// remove anything from the fromLines array that's already in the toLines array
-	fromLines = fromLines.filter(function (element) {
-		return !toLines.includes(element);
-	});
-
-	// if there are any lines to add, put them at the top of the today section
-	if (toSectionLine >= 0 && fromLines.length > 0) {
-		// stick the lines here
-		fromLines.push('');		// add an extra newline at the end
-		editor.edit((selectedText) => {
-			selectedText.insert(new vscode.Position(toSectionLine, 0),
-				fromLines.join('\r\n')
-			);
-		});
-	}
-
+	return sectionLines;
 }
 
-export function isSectionHead(line: string) {
+function getSectionLineNumber(editor: vscode.TextEditor, sectionName: string) {
+	for (let i = 0; i < editor.document.lineCount; i++) {
+		if (isSectionHead(editor.document.lineAt(i).text) === sectionName) {
+			return i;
+		}
+	}
+}
+
+function isSectionHead(line: string) {
 
 	const trimmed: string = line.trim();
 
