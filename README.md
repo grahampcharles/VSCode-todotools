@@ -50,6 +50,10 @@ The document must have sections for "Daily" and "Today" in standard TaskPaper sy
 
 ## Release Notes
 
+### 0.0.3
+
+* Added activationEvents call. 
+
 ### 0.0.2
 
 * Added a simple second recurrence section: "Every Third Day" 
