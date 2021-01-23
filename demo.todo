@@ -1,0 +1,23 @@
+Today:
+	- test daily 1
+	- test1
+	- test2
+
+Daily:
+	- test daily 1
+	- test daily 2
+
+Every Third Day:
+	- test third day 1
+
+Every Seventh Day:
+	- test seventh day 1
+
+Monthly:
+	- dishwasher filter
+
+---
+# todotools settings for this document
+runOnOpen: true
+lastAutoRun: Fri Jan 22 2021
+---
