@@ -50,6 +50,10 @@ The document must have sections for "Daily" and "Today" in standard TaskPaper sy
 
 ## Release Notes
 
+### 0.0.4
+
+* Added YAML property to prevent autorun more than once per day.
+
 ### 0.0.3
 
 * Added activationEvents call. 

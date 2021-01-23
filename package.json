@@ -16,6 +16,7 @@
 	],
 	"activationEvents": [
 		"onCommand:todotools.copyDailyToToday",
+		"onCommand:todotools.runOnOpen",
 		"onLanguage:todo"
 	],
 	"main": "./out/extension.js",
@@ -24,6 +25,10 @@
 			{
 				"command": "todotools.copyDailyToToday",
 				"title": "ToDo Tools: Copy Daily Tasks to Today"
+			},
+			{
+				"command": "todotools.runOnOpen",
+				"title": "ToDo Tools: Simulate On Open"
 			}
 		]
 	},
