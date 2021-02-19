@@ -14,7 +14,8 @@ None.
 ## Development Pathway
 
 * Change command name to more generic name, like, updateRecurringTasks or something
-* Make only work on taskpaper documents.
+* add recurrence: "after n days" pattern
+* add command to turn on autorun (by creating the YAML section)
 * Implement the "copy" using extension settings, something like this:
 
 ````
@@ -49,6 +50,24 @@ The document must have sections for "Daily" and "Today" in standard TaskPaper sy
 ````
 
 ## Release Notes
+
+### 0.0.7
+
+* bugfix: day-of-week clears one too many lines, including the next section name if it's close enough
+
+### 0.0.6
+
+Added new opinionated day-of-week cues:
+
+```Weekday Name (singular): (e.g. "Sunday")```
+  - item will be added to today once and then removed 
+
+```Weekday Name (singular): (e.g. "Sundays")```
+  - item will be added to today but retained
+
+### 0.0.5
+
+* Added days-of-the-week cues
 
 ### 0.0.4
 

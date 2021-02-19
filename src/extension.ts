@@ -2,10 +2,16 @@ import * as vscode from 'vscode';
 import yaml = require('yamljs');
 import { insidersDownloadDirToExecutablePath } from 'vscode-test/out/util';
 import { log } from 'console';
+import { resolve } from 'dns';
 
 const yamlDelimiter = '---';
 const yamlLastRunProperty = 'lastAutoRun';
 const yamlRunOnOpenProperty = 'runOnOpen';
+
+type SectionBounds = {
+	first: number,
+	last: number
+};
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -59,52 +65,69 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	}
 
-	async function performCopy(textEditor: vscode.TextEditor) {
+	function performCopy(textEditor: vscode.TextEditor): Thenable<boolean> {
 
 		// find the today line number
-		const todayLine = getSectionLineNumber(textEditor, "Today");
-		if (!(todayLine === undefined)) {   // no point going on if there's no Today section
+		if (!(getSectionLineNumber(textEditor, "Today") === undefined)) {   // no point going on if there's no Today section
+
+			// get today's date
+			const todayDate = new Date();
 
 			// get the "Today" section
 			const today = getSection(textEditor, "Today");
 
 			// get the "Daily" section
-			var lines = getSection(textEditor, "Daily");
+			var linesToAdd = getSection(textEditor, "Daily");
 
 			// how many days have passed since the beginning of time?	
-			const daysSinceTheBeginningOfTime = daysPassed(new Date(0), new Date());
+			const daysSinceTheBeginningOfTime = daysPassed(new Date(0), todayDate);
+			console.log(`days since time: ${daysSinceTheBeginningOfTime}`);
+			const ordinals = ['Other', 'Third', 'Fourth', 'Fifth', 'Sixth', 'Seventh'];
 
-			// is this day divisible by 3?
-			if (daysSinceTheBeginningOfTime % 3 === 0) {
-				// add the "Every Third Day" section
-				lines = lines.concat(getSection(textEditor, "Every Third Day"));
-			}
+			ordinals.forEach((element, index) => {
+				if (daysSinceTheBeginningOfTime % (index + 3) === 0) {
+					linesToAdd = linesToAdd.concat(getSection(textEditor, `Every ${ordinals[index]} Day`));
+				}
+			});
+
+			// days of the week
+			const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+			const todayName = dayNames[todayDate.getDay()];
+			// repeating ("Sundays, etc.")
+			linesToAdd = linesToAdd.concat(getSection(textEditor, todayName.concat('s')));
+
+			// one-time
+			linesToAdd = linesToAdd.concat(getSection(textEditor, todayName));
 
 			// remove anything from the lines array that's already in the toLines array
 			// and unduplicate
-			lines = lines
+			linesToAdd = linesToAdd
 				.filter((v) => !today.includes(v))
 				.filter((v, i, a) => a.indexOf(v) === i);
 
-			if (lines.length > 0) {
+			if (linesToAdd.length > 0) {
 				// add a trailing item to ensure a terminal linefeed
-				lines.push('');
+				linesToAdd.push('');
 			}
 
-			// insert the lines 
-			await textEditor.edit((selectedText) => {
-				selectedText.insert(new vscode.Position(todayLine + 1, 0),
-					lines.join('\r\n')
-				);
-			});
+			// clear the one-time section and then insert the lines 
+			const todayLine = getSectionLineNumber(textEditor, "Today").first;
+			return clearSection(textEditor, todayName)
+				.then(() => textEditor.edit((selectedText) => {
+					selectedText.insert(new vscode.Position(todayLine + 1, 0),
+						linesToAdd.join('\r\n')
+					);
+				}));
 		}
-	}
 
+		// nothing to execute: return true
+		return new Promise<boolean>(() => true);
+	}
 }
 
 export function daysPassed(dtBegin: Date, dtEnd: Date): number {
 	const millisecondsPerDay = 1000 * 3600 * 24;
-	return (treatAsUTC(dtEnd) - treatAsUTC(dtBegin)) / millisecondsPerDay;
+	return Math.floor((treatAsUTC(dtEnd) - treatAsUTC(dtBegin)) / millisecondsPerDay) ;
 }
 
 function treatAsUTC(date: Date): number {
@@ -172,34 +195,65 @@ function getYamlSection(editor: vscode.TextEditor): string[] {
 	return sectionLines;
 }
 
+
 function getSection(editor: vscode.TextEditor, fromSection: string): string[] {
 
-	var sectionLines: string[] = [];
+	var lines: string[] = [];
 	var isInSection: Boolean = false;
 
 	for (let i = 0; i < editor.document.lineCount; i++) {
-
 		if (isSectionHead(editor.document.lineAt(i).text) === fromSection) {
 			isInSection = true;
+		} else if (editor.document.lineAt(i).text === yamlDelimiter) {
+			isInSection = false;
 		} else if (isSectionHead(editor.document.lineAt(i).text)) {
 			isInSection = false;
 		} else if (/\S/.test(editor.document.lineAt(i).text)) {
 			// something other than whitespace?
-			if (isInSection) { sectionLines.push(editor.document.lineAt(i).text); }
+			if (isInSection) {
+				lines.push(editor.document.lineAt(i).text);
+			}
 		}
 	}
 
-	return sectionLines;
+	return lines;
 }
 
-function getSectionLineNumber(editor: vscode.TextEditor, sectionName: string): number {
+async function clearSection(editor: vscode.TextEditor, fromSection: string): Promise<boolean> {
+
+	const lineRange: SectionBounds = getSectionLineNumber(editor, fromSection);
+
+	if (lineRange.last !== -1) {
+		var range = new vscode.Range(lineRange.first, 0, lineRange.last, 0);
+
+		return editor.edit((selectedText) => {
+			selectedText.delete(range);
+		});
+	}
+
+	return new Promise<boolean>(() => true);
+}
+
+function getSectionLineNumber(editor: vscode.TextEditor, sectionName: string): SectionBounds {
+
+	let isInSection = false;
+	let ret: SectionBounds = { first: -1, last: -1 };
+
 	for (let i: number = 0; i < editor.document.lineCount; i++) {
 		if (isSectionHead(editor.document.lineAt(i).text) === sectionName) {
-			return i;
+			ret.first = i + 1;
+			isInSection = true;
+		} else if (isInSection &&
+			(isSectionHead(editor.document.lineAt(i).text) ||
+				editor.document.lineAt(i).text === yamlDelimiter)) {
+			ret.last = i - 1;
+			return ret;
+		} else if (isInSection) {
+			ret.last = i;
 		}
 	}
 
-	return -1;
+	return ret;
 }
 
 function getYamlSectionLastLineNumber(editor: vscode.TextEditor, createIfMissing: boolean): number {

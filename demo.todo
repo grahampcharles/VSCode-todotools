@@ -1,4 +1,11 @@
 Today:
+	- test every Monday
+	- test other day
+	- test third day 1
+	- test fourth day
+	- test fifth day
+	- every Monday
+	- test daily 2
 	- test daily 1
 	- test1
 	- test2
@@ -7,17 +14,34 @@ Daily:
 	- test daily 1
 	- test daily 2
 
+Every Other Day:
+	- test other day
+
 Every Third Day:
 	- test third day 1
 
+Every Fourth Day:
+	- test fourth day
+
+Every Fifth Day:
+	- test fifth day
+
+Every Sixth Day:
+	- test sixth day
+	
 Every Seventh Day:
 	- test seventh day 1
 
 Monthly:
 	- dishwasher filter
 
+Mondays:
+	- test every Monday
+
+Monday: 
+	- another Monday test
+
 ---
 # todotools settings for this document
-runOnOpen: true
-lastAutoRun: Fri Jan 22 2021
+runOnOpen: True
 ---
