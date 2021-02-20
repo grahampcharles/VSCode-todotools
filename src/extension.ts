@@ -65,7 +65,7 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	}
 
-	function performCopy(textEditor: vscode.TextEditor): Thenable<boolean> {
+	async function performCopy(textEditor: vscode.TextEditor): Promise<boolean> {
 
 		// find the today line number
 		if (!(getSectionLineNumber(textEditor, "Today") === undefined)) {   // no point going on if there's no Today section
@@ -113,11 +113,15 @@ export function activate(context: vscode.ExtensionContext) {
 			// clear the one-time section and then insert the lines 
 			const todayLine = getSectionLineNumber(textEditor, "Today").first;
 			return clearSection(textEditor, todayName)
-				.then(() => textEditor.edit((selectedText) => {
-					selectedText.insert(new vscode.Position(todayLine + 1, 0),
-						linesToAdd.join('\r\n')
-					);
-				}));
+				.then(() => {
+					console.info('making edit');
+					const edit = new vscode.WorkspaceEdit();
+					edit.insert( textEditor.document.uri, 
+						new vscode.Position(todayLine + 1, 0),
+						linesToAdd.join('\r\n') );
+					const applyThenable = vscode.workspace.applyEdit(edit);
+					return applyThenable;
+				});
 		}
 
 		// nothing to execute: return true
@@ -219,16 +223,19 @@ function getSection(editor: vscode.TextEditor, fromSection: string): string[] {
 	return lines;
 }
 
-async function clearSection(editor: vscode.TextEditor, fromSection: string): Promise<boolean> {
+function clearSection(editor: vscode.TextEditor, fromSection: string): Thenable<boolean> {
 
 	const lineRange: SectionBounds = getSectionLineNumber(editor, fromSection);
 
 	if (lineRange.last !== -1) {
 		var range = new vscode.Range(lineRange.first, 0, lineRange.last, 0);
-
-		return editor.edit((selectedText) => {
-			selectedText.delete(range);
-		});
+		const edit = new vscode.WorkspaceEdit();
+		edit.delete (editor.document.uri, range);
+		const applyThenable = vscode.workspace.applyEdit(edit);
+		return applyThenable;
+		// return editor.edit((selectedText) => {
+		// 	selectedText.delete(range);
+		// });
 	}
 
 	return new Promise<boolean>(() => true);
