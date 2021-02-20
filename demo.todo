@@ -1,6 +1,8 @@
 Today:
+	- every Saturday test
 	- test daily 1
 	- test daily 2
+	- a friday test
 	- test other day
 	- test fifth day
 	- every Friday test
@@ -45,5 +47,5 @@ Fridays:
 ---
 # todotools settings for this document
 runOnOpen: True
-lastAutoRun: Fri Feb 19 2021
+lastAutoRun: Sat Feb 20 2021
 ---

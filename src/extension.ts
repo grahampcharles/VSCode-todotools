@@ -228,17 +228,15 @@ function clearSection(editor: vscode.TextEditor, fromSection: string): Thenable<
 	const lineRange: SectionBounds = getSectionLineNumber(editor, fromSection);
 
 	if (lineRange.last !== -1) {
+		console.info('making clear');
 		var range = new vscode.Range(lineRange.first, 0, lineRange.last, 0);
 		const edit = new vscode.WorkspaceEdit();
 		edit.delete (editor.document.uri, range);
 		const applyThenable = vscode.workspace.applyEdit(edit);
 		return applyThenable;
-		// return editor.edit((selectedText) => {
-		// 	selectedText.delete(range);
-		// });
 	}
 
-	return new Promise<boolean>(() => true);
+	return Promise.resolve(true); 
 }
 
 function getSectionLineNumber(editor: vscode.TextEditor, sectionName: string): SectionBounds {
