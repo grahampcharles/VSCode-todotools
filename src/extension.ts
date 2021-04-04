@@ -7,6 +7,8 @@ import { resolve } from "dns";
 const yamlDelimiter = "---";
 const yamlLastRunProperty = "lastAutoRun";
 const yamlRunOnOpenProperty = "runOnOpen";
+const yamlRunDaily = "runDaily";
+const autoRunInterval = 1000 * 60 * 60 * 3;  // 3 hours
 
 type SectionBounds = {
     first: number;
@@ -17,9 +19,9 @@ type SectionBounds = {
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
     // run on activation, if the "runOnOpen" parameter is set
-    let textEditor = vscode.window.activeTextEditor;
+    const textEditor = vscode.window.activeTextEditor;
     if (textEditor) {
-        runOnOpen(textEditor);
+        automaticPerformCopy(textEditor);
     }
 
     // provide the implementation of the command with registerCommand
@@ -34,48 +36,73 @@ export function activate(context: vscode.ExtensionContext) {
     );
     context.subscriptions.push(disposable);
 
+    // automatic re-run
+    const autoRunFunction = function () {
+        console.log("autorun called");
+        let textEditor = vscode.window.activeTextEditor;
+        if (textEditor) {
+            automaticPerformCopy(textEditor);
+        }
+    };
+    if (textEditor && yamlValue(textEditor, yamlRunDaily)) {
+        console.log("autorun interval set");
+        setInterval(autoRunFunction, autoRunInterval);
+    }
+
     // provide the implementation of the command with registerCommand
     disposable = vscode.commands.registerCommand("todotools.runOnOpen", () => {
         let textEditor = vscode.window.activeTextEditor;
         if (textEditor) {
-            runOnOpen(textEditor);
+            automaticPerformCopy(textEditor);
         }
     });
     context.subscriptions.push(disposable);
 
-    function runOnOpen(editor: vscode.TextEditor) {
-        const yamlParsed = yaml.parse(getYamlSection(editor).join("\r\n"));
-        if (
-            yamlParsed &&
-            yamlRunOnOpenProperty in yamlParsed &&
-            yamlParsed[yamlRunOnOpenProperty]
-        ) {
+    function automaticPerformCopy(editor: vscode.TextEditor) {
+        if (yamlValue(editor, yamlRunOnOpenProperty)) {
             // we *should* run on open
+            // unless we jave already run today
 
-            // have we already run recently?
-            if (yamlLastRunProperty in yamlParsed) {
-                if (
-                    daysPassed(
-                        new Date(yamlParsed[yamlLastRunProperty]),
-                        new Date(new Date().toDateString())
-                    ) === 0
-                ) {
-                    return;
-                }
+            const lastRun = yamlValue(editor, yamlLastRunProperty);
+
+            if (
+                lastRun === undefined ||
+                daysPassed(
+                    new Date(lastRun),
+                    new Date(new Date().toDateString())
+                ) !== 0
+            ) {
+                performCopyAndSave(editor);
             }
+        }
+    }
 
-            // do the copy and update the last run flag
-            performCopy(editor).then(() =>
+    function yamlValue(
+        editor: vscode.TextEditor,
+        key: string
+    ): string | undefined {
+        const yamlParsed = yaml.parse(getYamlSection(editor).join("\r\n"));
+        if (yamlParsed && key in yamlParsed) {
+            return yamlParsed[key] as string;
+        } else {
+            return undefined;
+        }
+    }
+
+    function performCopyAndSave(editor: vscode.TextEditor) {
+        // do the copy and update the last run flag
+        performCopy(editor)
+            .then(() =>
                 setYamlProperty(
                     editor,
                     yamlLastRunProperty,
                     new Date().toDateString()
                 )
-            ).then(() => 
-					// save after making the changes
-					editor.document.save()
-			);
-        }
+            )
+            .then(() =>
+                // save after making the changes
+                editor.document.save()
+            );
     }
 
     async function performCopy(

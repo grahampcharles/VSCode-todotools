@@ -9,12 +9,25 @@ The `todotools` extension adds some task list management shortcuts for TaskPaper
 
 ## Extension Settings
 
-None. 
+None in .json. Each file has these possible settings in a YAML section at the end:
+
+```
+---
+# todotools settings for this document
+runOnOpen: True
+runDaily: True
+---
+```
+
+**runOnOpen**
+: True if the recurrence engine will check for new tasks when the file is opened.
+
+**runDaily**
+: True if the file continues to automatically check for new recurrence patterns as long as it's open. (Currently, this happens every 3 hours.)
 
 ## Development Pathway
 
 * Change command name to more generic name, like, updateRecurringTasks or something
-* add recurrence: "after n days" pattern
 * add command to turn on autorun (by creating the YAML section)
 * Implement the "copy" using extension settings, something like this:
 
