@@ -3,20 +3,23 @@
 All notable changes to the "todotools" extension will be documented in this file.
 ( Added, Changed, Deprecated, Removed, Fixed, Security)
 
-## [0.0.8] - Unreleased
+## [0.0.9] - 
+### added:
+* autosave when auto-running
+
+## [0.0.8] - 2021-02-20
 ### Fixed
 * edits not being executed
 
-
-## [0.0.7] - 2012-02-20
+## [0.0.7] - 2021-02-20
 ### Fixed
 * day-of-week clears one too many lines, including the next section name if it's close enough
 
 ## [0.0.6] - 2021-02-01
 ### Added 
 * opinionated day-of-week cues:
-   - ```Weekday Name (singular): (e.g. "Sunday")```
-   - ```Weekday Name (singular): (e.g. "Sundays")```
+   - ```Weekday Name (singular): (e.g. "Sunday")``` for one-time tasks (e.g. "next Sunday")
+   - ```Weekday Name (singular): (e.g. "Sundays")``` for recurring tasks (e.g. "every Sunday")
 
 ## [0.0.5]
 ### Added

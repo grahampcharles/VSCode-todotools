@@ -1,9 +1,8 @@
 Today:
-	- every Saturday test
+	- test other day
+	- a Saturday test
 	- test daily 1
 	- test daily 2
-	- a friday test
-	- test other day
 	- test fifth day
 	- every Friday test
 
@@ -38,6 +37,8 @@ Mondays:
 Monday: 
 	- another Monday test
 
+Saturday:
+
 Friday:
 	- a friday test
 
@@ -47,5 +48,5 @@ Fridays:
 ---
 # todotools settings for this document
 runOnOpen: True
-lastAutoRun: Sat Feb 20 2021
+lastAutoRun: Sat Apr 03 2021
 ---
