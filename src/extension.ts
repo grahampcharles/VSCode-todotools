@@ -68,8 +68,8 @@ export function activate(context: vscode.ExtensionContext) {
             if (
                 lastRun === undefined ||
                 daysPassed(
-                    new Date(lastRun),
-                    new Date(new Date().toDateString())
+                    new Date(lastRun.valueOf()),
+                    new Date()
                 ) !== 0
             ) {
                 performCopyAndSave(editor);
@@ -96,7 +96,7 @@ export function activate(context: vscode.ExtensionContext) {
                 setYamlProperty(
                     editor,
                     yamlLastRunProperty,
-                    new Date().toDateString()
+                    new Date().valueOf().toString() 
                 )
             )
             .then(() =>
