@@ -9,7 +9,7 @@ The `todotools` extension adds some task list management shortcuts for TaskPaper
 
 ## Extension Settings
 
-None in .json. Each file has these possible settings in a YAML section at the end:
+None in the settings file. Each file has these possible settings in a YAML section at the end:
 
 ```
 ---

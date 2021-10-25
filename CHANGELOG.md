@@ -3,7 +3,9 @@
 All notable changes to the "todotools" extension will be documented in this file.
 ( Added, Changed, Deprecated, Removed, Fixed, Security)
 
-## [0.0.9] - 
+## [0.1.0] - 
+
+## [0.0.9] - 2021-04-03
 ### added:
 * autosave when auto-running
 * auto-rerun every hour if file is open
