@@ -6,6 +6,12 @@ All notable changes to the "todotools" extension will be documented in this file
 ## [0.1.0] - 
 
 ## [0.0.9] - 2021-04-03
+## To Do:
+* set date to gmt date 
+* make sure update isn't happening twice (perhaps related to above) like when lastCheckDate appears to be in the future
+
+
+## [0.0.9] - 
 ### added:
 * autosave when auto-running
 * auto-rerun every hour if file is open
