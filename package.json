@@ -1,7 +1,7 @@
 {
 	"name": "todotools",
 	"displayName": "ToDoTools",
-	"publisher": "GrahamCharles",
+	"publisher": "grahampcharles",
 	"description": "Adds auxilary functions for taskpaper documents.",
 	"version": "0.1.1",
 	"repository": {
