@@ -61,7 +61,7 @@ export function activate(context: vscode.ExtensionContext) {
     function automaticPerformCopy(editor: vscode.TextEditor) {
         if (yamlValue(editor, yamlRunOnOpenProperty)) {
             // we *should* run on open
-            // unless we jave already run today
+            // unless we have already run today
 
             const lastRun = yamlValue(editor, yamlLastRunProperty);
 
