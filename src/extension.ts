@@ -1,14 +1,12 @@
 import * as vscode from "vscode";
 import yaml = require("yamljs");
-import { insidersDownloadDirToExecutablePath } from "vscode-test/out/util";
-import { log } from "console";
-import { resolve } from "dns";
+import { dateLocaleOptions } from "./utilities";
 
 const yamlDelimiter = "---";
 const yamlLastRunProperty = "lastAutoRun";
 const yamlRunOnOpenProperty = "runOnOpen";
 const yamlRunDaily = "runDaily";
-const autoRunInterval = 1000 * 60 * 60 * 3;  // 3 hours
+const autoRunInterval = 1000 * 60 * 60 * 3; // 3 hours
 
 type SectionBounds = {
     first: number;
@@ -67,10 +65,7 @@ export function activate(context: vscode.ExtensionContext) {
 
             if (
                 lastRun === undefined ||
-                daysPassed(
-                    new Date(lastRun.valueOf()),
-                    new Date()
-                ) !== 0
+                daysPassed(new Date(lastRun.valueOf()), new Date()) !== 0
             ) {
                 performCopyAndSave(editor);
             }
@@ -96,7 +91,7 @@ export function activate(context: vscode.ExtensionContext) {
                 setYamlProperty(
                     editor,
                     yamlLastRunProperty,
-                    new Date().valueOf().toString() 
+                    new Date().valueOf().toString()
                 )
             )
             .then(() =>
@@ -126,7 +121,7 @@ export function activate(context: vscode.ExtensionContext) {
                 new Date(0),
                 todayDate
             );
-            console.log(`days since time: ${daysSinceTheBeginningOfTime}`);
+
             const ordinals = [
                 "Other",
                 "Third",
@@ -155,9 +150,25 @@ export function activate(context: vscode.ExtensionContext) {
                 "Saturday",
             ];
             const todayName = dayNames[todayDate.getDay()];
+
             // repeating ("Sundays, etc.")
             linesToAdd = linesToAdd.concat(
                 getSection(textEditor, todayName.concat("s"))
+            );
+
+            const localeOptions = dateLocaleOptions();
+            const locales = [undefined, "en-GB", "de-DE", "en-US"]; // start with local locale, then try a few typical ones
+
+            locales.forEach((locale) =>
+                localeOptions.forEach(
+                    (options) =>
+                        (linesToAdd = linesToAdd.concat(
+                            getSection(
+                                textEditor,
+                                todayDate.toLocaleDateString(locale, options)
+                            )
+                        ))
+                )
             );
 
             // one-time
@@ -174,7 +185,7 @@ export function activate(context: vscode.ExtensionContext) {
                 linesToAdd.push("");
             }
 
-            // clear the one-time section and then insert the lines
+            // clear the "just for today" section and then insert the lines
             const todayLine = getSectionLineNumber(textEditor, "Today").first;
             return clearSection(textEditor, todayName).then(() => {
                 console.info("making edit");
@@ -276,6 +287,8 @@ function getYamlSection(editor: vscode.TextEditor): string[] {
 function getSection(editor: vscode.TextEditor, fromSection: string): string[] {
     var lines: string[] = [];
     var isInSection: Boolean = false;
+
+    console.info(`section: ${fromSection}`);
 
     for (let i = 0; i < editor.document.lineCount; i++) {
         if (isSectionHead(editor.document.lineAt(i).text) === fromSection) {

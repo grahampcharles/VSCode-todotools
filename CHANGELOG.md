@@ -4,7 +4,15 @@ All notable changes to the "todotools" extension will be documented in this file
 ( Added, Changed, Deprecated, Removed, Fixed, Security)
 
 ## To Do:
-* check if update thing is actually fixed
+### added
+* remove dated "one time only" section, like "11/2/2021"
+
+### fixed
+* if `Today` section is empty, extension adds a blank line at the top of the section
+
+## [0.1.1] - 2021-11-02
+### added
+* arbitrary future date items in the format `mm-dd` or `yyyy-mm-dd`
 
 ## [0.1.0] - 2021-10-25
 ### fixed:

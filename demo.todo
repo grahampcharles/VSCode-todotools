@@ -1,17 +1,9 @@
 Today:
-	- test other day
-	- test fourth day
-	- test every Monday
-	- another Monday test
-	- externally added Saturdays item
-	- every Saturday test 2
-	- every Saturday test
-	- Saturday test
 	- test daily 1
+	- another Tuesday test
 	- test daily 2
-	- test fifth day
-	- every Friday test
-
+	- test other day
+	
 Daily:
 	- test daily 1
 	- test daily 2
@@ -47,6 +39,11 @@ Saturdays:
 	- every Saturday test 2
 	- externally added Saturdays item
 
+11/02:
+	- test Nov. 2 item
+
+Tuesday:
+
 Friday:
 	- a friday test
 
@@ -57,5 +54,5 @@ Fridays:
 # todotools settings for this document
 runOnOpen: True
 runDaily: True
-lastAutoRun: 1635186550785
+lastAutoRun: 1635889247424
 ---
