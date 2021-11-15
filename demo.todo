@@ -55,4 +55,7 @@ Fridays:
 runOnOpen: True
 runDaily: True
 lastAutoRun: 1635889247424
+tasks:
+	mow lawn: 2
+
 ---
