@@ -1,7 +1,8 @@
 import * as vscode from "vscode";
 import yaml = require("yamljs");
-import { dayNames } from "./dates";
+import { dayNames, daysPassed, daysSinceTheBeginningOfTime } from "./dates";
 import { dateLocaleOptions } from "./utilities";
+import { isCurrentRecurringItem, parseYamlTasks } from "./parseYamlTasks";
 
 const yamlDelimiter = "---";
 const yamlLastRunProperty = "lastAutoRun";
@@ -114,14 +115,14 @@ export function activate(context: vscode.ExtensionContext) {
             // get the "Today" section
             const today = getSection(textEditor, "Today");
 
-            // get the "Daily" section
-            var linesToAdd = getSection(textEditor, "Daily");
+            var linesToAdd: string[] = [];
 
-            // how many days have passed since the beginning of time?
-            const daysSinceTheBeginningOfTime = daysPassed(
-                new Date(0),
-                todayDate
-            );
+            const recurring = parseYamlTasks(getYamlSection(textEditor).join("\r\n"));
+
+            recurring.filter((item) => isCurrentRecurringItem(item));
+
+            // get the "Daily" section
+            linesToAdd = linesToAdd.concat(getSection(textEditor, "Daily"));
 
             const ordinals = [
                 "Other",
@@ -197,18 +198,6 @@ export function activate(context: vscode.ExtensionContext) {
     }
 }
 
-export function daysPassed(dtBegin: Date, dtEnd: Date): number {
-    const millisecondsPerDay = 1000 * 3600 * 24;
-    return Math.floor(
-        (treatAsUTC(dtEnd) - treatAsUTC(dtBegin)) / millisecondsPerDay
-    );
-}
-
-function treatAsUTC(date: Date): number {
-    var result = new Date(date);
-    result.setMinutes(result.getMinutes() - result.getTimezoneOffset());
-    return result.getTime();
-}
 
 function setYamlProperty(
     editor: vscode.TextEditor,
