@@ -2,7 +2,6 @@ import { dayNameToWeekday } from "./dates";
 
 import YAML = require('yaml');
 import dayjs = require('dayjs');
-import customParseFormat = require('dayjs/plugin/customParseFormat');
 
 /* 
     yaml format:
@@ -16,8 +15,8 @@ import customParseFormat = require('dayjs/plugin/customParseFormat');
 export type RecurringTask = {
     name?: string,
     recurAfter?: number,     // every n days (1 = every day, 2 = every other, etc.)
-    dateAnnual?: string,     // date without a year, in dd-mm format
-    dateOnce?: number,       // date with a year
+    dateAnnual?: string,     // date without a year, in YYYY-MM-DD format
+    dateOnce?: string,       // date with a year, in YYYY-MM-DD
     dayOfWeek?: number       // day of week
 };
 
@@ -45,21 +44,22 @@ function yamlToTask(input: TaskInputType): RecurringTask {
     }
 
     if (typeof input === "string") {
-        // try convert day of week
+        // day of week
         const dayOfWeek = dayNameToWeekday(input);
         if (dayOfWeek !== -1) { return { dayOfWeek: dayOfWeek }; };
 
-        // try to convert date with year
-        const theDate = dayjs(input);
+        // date without a year
+        var theDate = dayjs("1600-".concat(input));       // concatenating 1600 to the beginning lets us detect dates without years
         if (theDate.isValid()) {
-            // TODO: sort this 2001 kludge! it appears to work in node, but possibly not after 2049?
-            if (theDate.get("year") === 2001) {
-                return { dateAnnual: theDate.format('DD-MM') };
-            } else {
-                return { dateOnce: theDate.unix() };
-            }
+            return { dateAnnual: theDate.format('MM-DD') };
+        }
+        // date with a year
+        theDate = dayjs(input);
+        if (theDate.isValid()) {
+            return { dateOnce: theDate.format('YYYY-MM-DD') };
         }
     }
+
 
     return {};      // no parse possible
 
