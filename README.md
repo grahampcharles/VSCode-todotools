@@ -27,38 +27,39 @@ runDaily: True
 
 ## Development Pathway
 
-* Change command name to more generic name, like, updateRecurringTasks or something
-* add command to turn on autorun (by creating the YAML section)
-* Implement the "copy" using extension settings, something like this:
+-   Change command name to more generic name, like, updateRecurringTasks or something
+-   add command to turn on autorun (by creating the YAML section)
+-   Implement the "copy" using extension settings, something like this:
 
-````
+```
   todotools.schedules : [
-    { 
-      fromFolder: 'Daily', 
+    {
+      fromFolder: 'Daily',
       toFolder: 'Today',
-      allowDuplicates: false, 
+      allowDuplicates: false,
     },
-    { 
-      fromFolder: 'Every Third Day', 
+    {
+      fromFolder: 'Every Third Day',
       toFolder: 'Today',
       icsPattern: ' ',
-      allowDuplicates: false, 
+      allowDuplicates: false,
     }
   ]
-````
+```
 
 The `icsPattern` idea refers to the calendar standard, which has a recurrence pattern rule (`RRULE`) that might come in useful.
 
 ## Known Issues
 
+### Sections
+
 The document must have sections for "Daily" and "Today" in standard TaskPaper syntax (starting at column 0 and ending with a colon).
 
-````
+```
     Today:
       - Task 1
 
     Daily:
       - Task 2
       - Task 3
-````
-
+```

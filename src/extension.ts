@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import yaml = require("yamljs");
+import { dayNames } from "./dates";
 import { dateLocaleOptions } from "./utilities";
 
 const yamlDelimiter = "---";
@@ -139,16 +140,7 @@ export function activate(context: vscode.ExtensionContext) {
                 }
             });
 
-            // days of the week
-            const dayNames = [
-                "Sunday",
-                "Monday",
-                "Tuesday",
-                "Wednesday",
-                "Thursday",
-                "Friday",
-                "Saturday",
-            ];
+
             const todayName = dayNames[todayDate.getDay()];
 
             // repeating ("Sundays, etc.")
@@ -162,12 +154,12 @@ export function activate(context: vscode.ExtensionContext) {
             locales.forEach((locale) =>
                 localeOptions.forEach(
                     (options) =>
-                        (linesToAdd = linesToAdd.concat(
-                            getSection(
-                                textEditor,
-                                todayDate.toLocaleDateString(locale, options)
-                            )
-                        ))
+                    (linesToAdd = linesToAdd.concat(
+                        getSection(
+                            textEditor,
+                            todayDate.toLocaleDateString(locale, options)
+                        )
+                    ))
                 )
             );
 
@@ -409,4 +401,4 @@ function isSectionHead(line: string) {
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() { }

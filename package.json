@@ -55,6 +55,8 @@
 		"vscode-test": "^1.4.1"
 	},
 	"dependencies": {
+		"dayjs": "^1.10.7",
+		"yaml": "^1.10.2",
 		"yamljs": "^0.3.0"
 	}
 }
