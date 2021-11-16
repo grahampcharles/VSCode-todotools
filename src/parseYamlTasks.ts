@@ -33,7 +33,7 @@ export function isCurrentRecurringItem(task: RecurringTask): boolean {
 
     if (task.recurAfter && (daysSinceTheBeginningOfTime % task.recurAfter === 0)) { return true; };
     if (task.dateAnnual && (dayjs(task.dateAnnual).format("MM-DD") === dayjs().format("MM-DD"))) { return true; }
-    if (task.dateOnce && (dayjs(task.dateAnnual).format("YYYY-MM-DD") === dayjs().format("YYYY-MM-DD"))) { return true; }
+    if (task.dateOnce && (dayjs(task.dateOnce).format("YYYY-MM-DD") === dayjs().format("YYYY-MM-DD"))) { return true; }
     if (task.dayOfWeek && (todayDate.getDay() === task.dayOfWeek)) { return true; }
 
     return false;

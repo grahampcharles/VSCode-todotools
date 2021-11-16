@@ -2,7 +2,7 @@
 	"name": "todotools",
 	"displayName": "ToDoTools",
 	"publisher": "grahampcharles",
-	"description": "Adds auxilary functions for taskpaper documents.",
+	"description": "Auxilary functions for taskpaper documents.",
 	"version": "0.1.2",
 	"repository": {
 		"type": "git",
@@ -41,6 +41,7 @@
 		"test": "node ./out/test/runTest.js"
 	},
 	"devDependencies": {
+		"@types/chai": "^4.2.22",
 		"@types/glob": "^7.1.3",
 		"@types/mocha": "^8.0.4",
 		"@types/node": "^12.11.7",
@@ -55,6 +56,7 @@
 		"vscode-test": "^1.4.1"
 	},
 	"dependencies": {
+		"chai": "^4.3.4",
 		"dayjs": "^1.10.7",
 		"yaml": "^1.10.2",
 		"yamljs": "^0.3.0"
