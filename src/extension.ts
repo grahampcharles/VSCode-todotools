@@ -79,7 +79,7 @@ export function activate(context: vscode.ExtensionContext) {
         const yamlParsed = YAML.parse(getYamlSection(editor).join("\r\n"));
 
         // TODO: why "tasks"?
-        if (!(yamlParsed && "tasks" in yamlParsed)) { return undefined; }
+        if (!(yamlParsed && key in yamlParsed)) { return undefined; }
         return yamlParsed[key] as string;
     }
 
