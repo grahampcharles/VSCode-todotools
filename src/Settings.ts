@@ -1,5 +1,7 @@
+import * as vscode from "vscode";
 import dayjs = require("dayjs");
 import YAML = require("yaml");
+import { getYamlSection } from "./yaml-utilities";
 
 export class Settings {
     runOnOpen: boolean = false;
@@ -25,6 +27,13 @@ export class Settings {
         if (yamlSettings.runOnOpen) { this.runOnOpen = yamlSettings.runOnOpen; }
         if (yamlSettings.runDaily) { this.runDaily = yamlSettings.runDaily; }
         if (yamlSettings.lastAutoRun) { this.lastAutoRun = dayjs(yamlSettings.lastAutoRun); }
+    }
+
+    readFromTextEditor(textEditor: vscode.TextEditor): void {
+        if (textEditor) {
+            const yamlString = getYamlSection(textEditor).join("\r\n");
+            this.readFromYaml(yamlString);
+        }
     }
 
 

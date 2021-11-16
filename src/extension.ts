@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import YAML = require('yaml');
 
-import { isCurrentRecurringItem, parseYamlTasks } from "./parseYamlTasks";
+import { getYamlSection, isCurrentRecurringItem, parseYamlTasks } from "./yaml-utilities";
 import { autoRunInterval, yamlDelimiter, yamlLastRunProperty, yamlRunDaily, yamlRunOnOpenProperty } from "./constants";
 import { Settings } from "./Settings";
 import dayjs = require("dayjs");
@@ -58,21 +58,10 @@ export function activate(context: vscode.ExtensionContext) {
     });
     context.subscriptions.push(disposable);
 
-    function updateSettings(): void {
-        let textEditor = vscode.window.activeTextEditor;
-        if (textEditor) {
-            const yamlString = getYamlSection(textEditor).join("\r\n");
-            let settings = new Settings(yamlString);
-            // settings.readFromYaml(
-            //     getYamlSection(textEditor).join("\r\n")
-            // );
-        }
-    }
-
     function automaticPerformCopy(editor: vscode.TextEditor) {
         // we *should* run on open
         // unless we have already run today (local time)
-        updateSettings();
+        settings.readFromTextEditor(editor);
         if (!settings.hasRunToday()) { performCopyAndSave(editor); }
     }
 
@@ -82,7 +71,6 @@ export function activate(context: vscode.ExtensionContext) {
     ): string | undefined {
         const yamlParsed = YAML.parse(getYamlSection(editor).join("\r\n"));
 
-        // TODO: why "tasks"?
         if (!(yamlParsed && key in yamlParsed)) { return undefined; }
         return yamlParsed[key] as string;
     }
@@ -193,24 +181,6 @@ function setYamlProperty(
     editor.edit((selectedText) => {
         selectedText.insert(new vscode.Position(yamlInsertLine, 0), newline);
     });
-}
-
-function getYamlSection(editor: vscode.TextEditor): string[] {
-    var sectionLines: string[] = [];
-    var isInSection: Boolean = false;
-
-    for (let i = 0; i < editor.document.lineCount; i++) {
-        if (editor.document.lineAt(i).text === yamlDelimiter) {
-            isInSection = !isInSection;
-        } else if (/\S/.test(editor.document.lineAt(i).text)) {
-            // something other than whitespace?
-            if (isInSection) {
-                sectionLines.push(editor.document.lineAt(i).text);
-            }
-        }
-    }
-
-    return sectionLines;
 }
 
 function getSection(editor: vscode.TextEditor, fromSection: string): string[] {

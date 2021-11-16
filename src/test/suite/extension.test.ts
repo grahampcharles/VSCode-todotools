@@ -2,10 +2,9 @@ import * as assert from 'assert';
 import * as vscode from 'vscode';
 import * as chai from 'chai';
 import { dayNames, dayNameToWeekday, daysPassed, todayDay, todayName } from '../../dates';
-import { dateLocaleOptions } from '../../utilities';
-import { isCurrentRecurringItem, parseYamlTasks, RecurringTask } from '../../parseYamlTasks';
+import { isCurrentRecurringItem, parseYamlTasks, RecurringTask } from '../../yaml-utilities';
 import { expect } from 'chai';
-import { testYaml, testYamlTasks, testYamlTasksComplex } from './testdata';
+import { testYaml, testYamlTasks, testYamlTasksComplex, testYamlToday } from './testdata';
 import YAML = require('yaml');
 import { Settings } from '../../Settings';
 import dayjs = require('dayjs');
@@ -38,14 +37,14 @@ suite('Extension Test Suite', () => {
 
 		// default settings
 		settings.readFromYaml(testYaml);
-		expect(settings.hasRunToday(), "default settings: has run today").to.be.false;
+		expect(settings.hasRunToday(), "default settings: hasRunToday").to.be.false;
 		expect(settings.runOnOpen, "default settings: runOnOpen").to.be.true;
 		expect(settings.runDaily, "default settings: runDaily").to.be.true;
 
-	});
+		// change to today
+		settings.readFromYaml(testYamlToday);
+		expect(settings.hasRunToday(), "today: hasRunToday").to.be.true;
 
-	test('date locale options', () => {
-		expect(dateLocaleOptions()).to.have.lengthOf(12);
 	});
 
 	test('yaml parsing', () => {
