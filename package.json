@@ -3,7 +3,7 @@
     "displayName": "ToDoTools",
     "publisher": "grahampcharles",
     "description": "Auxilary functions for taskpaper documents.",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "repository": {
         "type": "git",
         "url": "git://github.com/grahampcharles/VSCode-todotools.git"
@@ -33,8 +33,11 @@
         ]
     },
     "scripts": {
-        "vscode:prepublish": "npm run compile",
-        "compile": "tsc -p ./",
+        "vscode:prepublish": "npm run esbuild-base -- --minify",
+        "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
+        "esbuild": "npm run esbuild-base -- --sourcemap",
+        "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
+        "test-compile": "tsc -p ./",
         "watch": "tsc -watch -p ./",
         "pretest": "npm run compile && npm run lint",
         "lint": "eslint src --ext ts",
@@ -49,6 +52,7 @@
         "@types/yamljs": "^0.2.31",
         "@typescript-eslint/eslint-plugin": "^4.9.0",
         "@typescript-eslint/parser": "^4.9.0",
+        "esbuild": "^0.13.14",
         "eslint": "^7.15.0",
         "glob": "^7.1.6",
         "mocha": "^8.1.3",
