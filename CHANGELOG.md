@@ -9,6 +9,8 @@ All notable changes to the "todotools" extension will be documented in this file
 
 -   support "monthly" again
 -   remove contents of dated "one time only" section, like "11/2/2021"
+-   clean the yaml a bit
+-   support subsections within the yaml ("daily")
 
 ### fixed
 
