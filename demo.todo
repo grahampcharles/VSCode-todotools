@@ -1,60 +1,24 @@
 Today:
-	- test daily 1
-	- another Tuesday test
-	- test daily 2
-	- test other day
-	
-Daily:
+	- whatever's already here
 	- test daily 1
 	- test daily 2
-
-Every Other Day:
-	- test other day
-
-Every Third Day:
-	- test third day 1
-
-Every Fourth Day:
-	- test fourth day
-
-Every Fifth Day:
-	- test fifth day
-
-Every Sixth Day:
-	- test sixth day
-	
-Every Seventh Day:
-	- test seventh day 1
-
-Monthly:
-	- dishwasher filter
-
-Mondays:
 	- test every Monday
-
-Monday: 
-
-Saturdays:
-	- every Saturday test
-	- every Saturday test 2
-	- externally added Saturdays item
-
-11/02:
-	- test Nov. 2 item
-
-Tuesday:
-
-Friday:
-	- a friday test
-
-Fridays:
-	- every Friday test
 
 ---
 # todotools settings for this document
 runOnOpen: True
 runDaily: True
-lastAutoRun: 1635889247424
+lastAutoRun: 2021-11-16T06:52:22.906Z
 tasks:
-	mow lawn: 2
+  mow lawn: 2
+  test daily 1: 1
+  test daily 2: 1
+  test other day: 2
+  test third day: 3
+  test fourth day: 4
+  test fifth day: 5
+  test monthly: 30	
+  test every Monday: Monday
+  every Saturday test: Saturday
+  test Nov. 2 item: 11/02
 ---

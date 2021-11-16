@@ -1,8 +1,6 @@
 import * as vscode from "vscode";
 import YAML = require('yaml');
 
-import { dayNames, daysPassed, daysSinceTheBeginningOfTime } from "./dates";
-import { dateLocaleOptions } from "./utilities";
 import { isCurrentRecurringItem, parseYamlTasks } from "./parseYamlTasks";
 import { autoRunInterval, yamlDelimiter, yamlLastRunProperty, yamlRunDaily, yamlRunOnOpenProperty } from "./constants";
 import { Settings } from "./Settings";
@@ -12,14 +10,17 @@ type SectionBounds = {
     first: number;
     last: number;
 };
+let settings: Settings = new Settings();
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
     // run on activation, if the "runOnOpen" parameter is set
     const textEditor = vscode.window.activeTextEditor;
-    let settings: Settings = new Settings();
+
+    // get settings
     if (textEditor) {
+        // perform automatic copy
         automaticPerformCopy(textEditor);
     }
 
@@ -34,13 +35,6 @@ export function activate(context: vscode.ExtensionContext) {
         }
     );
     context.subscriptions.push(disposable);
-
-    // get settings
-    if (textEditor) {
-        settings.readFromYaml(
-            getYamlSection(textEditor).join("\r\n")
-        );
-    }
 
     // automatic re-run
     const autoRunFunction = function () {
@@ -64,12 +58,22 @@ export function activate(context: vscode.ExtensionContext) {
     });
     context.subscriptions.push(disposable);
 
-    function automaticPerformCopy(editor: vscode.TextEditor) {
-        if (yamlValue(editor, yamlRunOnOpenProperty)) {
-            // we *should* run on open
-            // unless we have already run today (local time)
-            if (!settings.hasRunToday()) { performCopyAndSave(editor); }
+    function updateSettings(): void {
+        let textEditor = vscode.window.activeTextEditor;
+        if (textEditor) {
+            const yamlString = getYamlSection(textEditor).join("\r\n");
+            let settings = new Settings(yamlString);
+            // settings.readFromYaml(
+            //     getYamlSection(textEditor).join("\r\n")
+            // );
         }
+    }
+
+    function automaticPerformCopy(editor: vscode.TextEditor) {
+        // we *should* run on open
+        // unless we have already run today (local time)
+        updateSettings();
+        if (!settings.hasRunToday()) { performCopyAndSave(editor); }
     }
 
     function yamlValue(
@@ -106,88 +110,35 @@ export function activate(context: vscode.ExtensionContext) {
         if (!(getSectionLineNumber(textEditor, "Today") === undefined)) {
             // no point going on if there's no Today section
 
-            // get today's date
-            const todayDate = new Date();
-
-            // get the "Today" section
+            // get the "Today" section for comparison
             const today = getSection(textEditor, "Today");
-
-            var linesToAdd: string[] = [];
-
             const recurring = parseYamlTasks(getYamlSection(textEditor).join("\r\n"));
 
-            recurring.filter((item) => isCurrentRecurringItem(item));
-
-            // get the "Daily" section
-            linesToAdd = linesToAdd.concat(getSection(textEditor, "Daily"));
-
-            const ordinals = [
-                "Other",
-                "Third",
-                "Fourth",
-                "Fifth",
-                "Sixth",
-                "Seventh",
-            ];
-
-            ordinals.forEach((element, index) => {
-                if (daysSinceTheBeginningOfTime % (index + 3) === 0) {
-                    linesToAdd = linesToAdd.concat(
-                        getSection(textEditor, `Every ${ordinals[index]} Day`)
-                    );
-                }
-            });
-
-
-            const todayName = dayNames[todayDate.getDay()];
-
-            // repeating ("Sundays, etc.")
-            linesToAdd = linesToAdd.concat(
-                getSection(textEditor, todayName.concat("s"))
-            );
-
-            const localeOptions = dateLocaleOptions();
-            const locales = [undefined, "en-GB", "de-DE", "en-US"]; // start with local locale, then try a few typical ones
-
-            locales.forEach((locale) =>
-                localeOptions.forEach(
-                    (options) =>
-                    (linesToAdd = linesToAdd.concat(
-                        getSection(
-                            textEditor,
-                            todayDate.toLocaleDateString(locale, options)
-                        )
-                    ))
-                )
-            );
-
-            // one-time
-            linesToAdd = linesToAdd.concat(getSection(textEditor, todayName));
-
-            // remove anything from the lines array that's already in the toLines array
-            // and unduplicate
-            linesToAdd = linesToAdd
+            const linesToAdd = recurring
+                .filter((item) => isCurrentRecurringItem(item))
+                .map((item) => item.name ?? "")
+                // remove anything that's already in the today
                 .filter((v) => !today.includes(v))
-                .filter((v, i, a) => a.indexOf(v) === i);
+                // unduplicate
+                .filter((v, i, a) => a.indexOf(v) === i)
+                // add leading tab
+                .map((item) => `\t- ${item}`);
 
             if (linesToAdd.length > 0) {
                 // add a trailing item to ensure a terminal linefeed
                 linesToAdd.push("");
             }
 
-            // clear the "just for today" section and then insert the lines
+            // insert the lines
             const todayLine = getSectionLineNumber(textEditor, "Today").first;
-            return clearSection(textEditor, todayName).then(() => {
-                console.info("making edit");
-                const edit = new vscode.WorkspaceEdit();
-                edit.insert(
-                    textEditor.document.uri,
-                    new vscode.Position(todayLine + 1, 0),
-                    linesToAdd.join("\r\n")
-                );
-                const applyThenable = vscode.workspace.applyEdit(edit);
-                return applyThenable;
-            });
+            const edit = new vscode.WorkspaceEdit();
+            edit.insert(
+                textEditor.document.uri,
+                new vscode.Position(todayLine + 1, 0),
+                linesToAdd.join("\r\n")
+            );
+            const applyThenable = vscode.workspace.applyEdit(edit);
+            return applyThenable;
         }
 
         // nothing to execute: return true

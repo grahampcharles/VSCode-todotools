@@ -1,5 +1,4 @@
 // days of the week
-
 import dayjs = require("dayjs");
 
 // TODO: i8n
@@ -35,12 +34,12 @@ export function treatAsUTC(date: Date): number {
     return result.getTime();
 }
 
-export const todayDate = new Date();
 export const todayDay = dayjs();
+export const todayName = dayNames[todayDay.day()];
 
 // how many days have passed since the beginning of time?
 // TODO: use dayjs for this?
 export const daysSinceTheBeginningOfTime = daysPassed(
     new Date(0),
-    todayDate
+    todayDay.toDate()
 );

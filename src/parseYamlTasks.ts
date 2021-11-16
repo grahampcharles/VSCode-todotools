@@ -1,4 +1,4 @@
-import { dayNameToWeekday, daysSinceTheBeginningOfTime, todayDate } from "./dates";
+import { dayNameToWeekday, daysSinceTheBeginningOfTime, todayDay } from "./dates";
 
 import YAML = require('yaml');
 import dayjs = require('dayjs');
@@ -34,7 +34,7 @@ export function isCurrentRecurringItem(task: RecurringTask): boolean {
     if (task.recurAfter && (daysSinceTheBeginningOfTime % task.recurAfter === 0)) { return true; };
     if (task.dateAnnual && (dayjs(task.dateAnnual).format("MM-DD") === dayjs().format("MM-DD"))) { return true; }
     if (task.dateOnce && (dayjs(task.dateOnce).format("YYYY-MM-DD") === dayjs().format("YYYY-MM-DD"))) { return true; }
-    if (task.dayOfWeek && (todayDate.getDay() === task.dayOfWeek)) { return true; }
+    if (task.dayOfWeek && (todayDay.day() === task.dayOfWeek)) { return true; }
 
     return false;
 
@@ -79,7 +79,6 @@ function yamlToTask(input: TaskInputType): RecurringTask {
             return { dateOnce: theDate.format('YYYY-MM-DD') };
         }
     }
-
 
     return {};      // no parse possible
 

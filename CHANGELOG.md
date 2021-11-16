@@ -7,11 +7,13 @@ All notable changes to the "todotools" extension will be documented in this file
 
 ### added
 
+-   support "monthly" again
 -   remove contents of dated "one time only" section, like "11/2/2021"
 
 ### fixed
 
 -   if `Today` section is empty, extension adds a blank line at the top of the section
+-   add error handling on parser
 
 ## [0.1.2] - Unreleased
 

@@ -1,16 +1,14 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
 import * as chai from 'chai';
-import { dayNames, dayNameToWeekday, daysPassed, todayDate, todayDay } from '../../dates';
+import { dayNames, dayNameToWeekday, daysPassed, todayDay, todayName } from '../../dates';
 import { dateLocaleOptions } from '../../utilities';
 import { isCurrentRecurringItem, parseYamlTasks, RecurringTask } from '../../parseYamlTasks';
 import { expect } from 'chai';
-import { testYaml, testYamlTasks } from './testdata';
+import { testYaml, testYamlTasks, testYamlTasksComplex } from './testdata';
 import YAML = require('yaml');
 import { Settings } from '../../Settings';
 import dayjs = require('dayjs');
-
-// test documentation -> https://mochajs.org/
 
 suite('Extension Test Suite', () => {
 	vscode.window.showInformationMessage('Start all tests.');
@@ -23,6 +21,9 @@ suite('Extension Test Suite', () => {
 		// day names
 		assert.strictEqual("Sunday", dayNames[0]);
 		assert.strictEqual(0, dayNameToWeekday("Sunday"));
+
+		// today's day name
+		assert.strictEqual(todayName, dayNames[todayDay.day()]);
 
 	});
 
@@ -69,6 +70,15 @@ suite('Extension Test Suite', () => {
 		const xmas = tasks.filter(e => e.name === "start XMas shopping")[0];
 		expect(xmas).property("dateAnnual").eql("12-01");
 
+		const novalue = tasks.filter(e => e.name === "daily with no value")[0];
+		expect(novalue).property("recurAfter").eql(1);
+
+	});
+
+	test('yaml parsing, complex', () => {
+
+		const tasks = parseYamlTasks(testYamlTasksComplex);
+		expect(tasks.length).eql(11);
 
 	});
 
