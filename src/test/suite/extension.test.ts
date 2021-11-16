@@ -60,13 +60,32 @@ suite('Extension Test Suite', () => {
 			name: "test task",
 			dateOnce: todayDay.format("YYYY-MM-DD")
 		};
+		const yesterday = todayDay.subtract(1, "day");
 
+		// dateOnce is today
 		expect(isCurrentRecurringItem(testItem)).to.be.true;
 
-		testItem.dateOnce = todayDay.subtract(1, "day").format("YYYY-MM-DD");
+		// dateOnce is not today
+		testItem.dateOnce = yesterday.format("YYYY-MM-DD");
 		expect(isCurrentRecurringItem(testItem)).to.be.false;
 
-		// #### TODO: LEFT OFF HERE
+		delete testItem.dateOnce;
+
+		// dateAnnual is today
+		testItem.dateAnnual = todayDay.format("MM-DD");
+		expect(isCurrentRecurringItem(testItem)).to.be.true;
+
+		// dateAnnual is not today
+		testItem.dateAnnual = yesterday.format("MM-DD");
+		expect(isCurrentRecurringItem(testItem)).to.be.false;
+
+		delete testItem.dateAnnual;
+
+		// dayOfWeek is today's
+		testItem.dayOfWeek = todayDay.get('day');
+		expect(isCurrentRecurringItem(testItem)).to.be.true;
+		testItem.dayOfWeek = yesterday.get('day');
+		expect(isCurrentRecurringItem(testItem)).to.be.false;
 
 	});
 });

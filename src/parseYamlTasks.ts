@@ -50,11 +50,9 @@ export function parseYamlTasks(yamlSection: string): RecurringTask[] {
     if (!(tree && "tasks" in tree)) { return []; }
     const tasks = tree["tasks"];
 
-    const tasks2 = Object.keys(tasks).map((key: string) => {
+    return Object.keys(tasks).map((key: string) => {
         return { name: key, ...yamlToTask(tasks[key] as number) } as RecurringTask;
     });
-
-    return tasks2;
 }
 
 type TaskInputType = number | string;
