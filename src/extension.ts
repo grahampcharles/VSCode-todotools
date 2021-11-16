@@ -116,13 +116,13 @@ export function activate(context: vscode.ExtensionContext) {
 
             const linesToAdd = recurring
                 .filter((item) => isCurrentRecurringItem(item))
-                .map((item) => item.name ?? "")
+                // add leading tab
+                .map((item) => `\t- ${item.name}` ?? "")
                 // remove anything that's already in the today
                 .filter((v) => !today.includes(v))
                 // unduplicate
                 .filter((v, i, a) => a.indexOf(v) === i)
-                // add leading tab
-                .map((item) => `\t- ${item}`);
+                ;
 
             if (linesToAdd.length > 0) {
                 // add a trailing item to ensure a terminal linefeed

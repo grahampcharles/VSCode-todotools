@@ -10,17 +10,19 @@ All notable changes to the "todotools" extension will be documented in this file
 -   support "monthly" again
 -   remove contents of dated "one time only" section, like "11/2/2021"
 -   clean the yaml a bit
--   support subsections within the yaml ("daily")
+-   support subsections within the yaml (e.g. "daily")
+-   reports yaml parser errors
 
 ### fixed
 
 -   if `Today` section is empty, extension adds a blank line at the top of the section
--   add error handling on parser
+-   yaml parser has no error handling (specifically: duplicate keys, bad formatting (like tab instead of space))
 
-## [0.1.2] - Unreleased
+## [0.1.2] - 2021-11-16
 
 ### fixed
 
+-   repeats existing tasks
 -   merge the two YAML parsers; remove `yamljs` in favor of `yaml` (which has typescript types)
 
 ## [0.1.1] - 2021-11-02
