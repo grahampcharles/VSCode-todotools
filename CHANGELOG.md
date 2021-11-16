@@ -15,9 +15,14 @@ All notable changes to the "todotools" extension will be documented in this file
 
 ### fixed
 
--   autoruns even if a day has not passed
 -   if `Today` section is empty, extension adds a blank line at the top of the section
 -   yaml parser has no error handling (specifically: duplicate keys, bad formatting (like tab instead of space))
+
+## [0.2.1] - 2021-11-16
+
+### fixed
+
+-   autoruns even if a day has not passed
 
 ## [0.2.0] - 2021-11-16
 
