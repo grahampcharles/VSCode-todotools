@@ -11,11 +11,13 @@ All notable changes to the "todotools" extension will be documented in this file
 
 ### fixed
 
--   merge the two YAML parsers; remove `yamljs` in favor of `yaml` (which has typescript types)
+-   if `Today` section is empty, extension adds a blank line at the top of the section
+
+## [0.1.2] - Unreleased
 
 ### fixed
 
--   if `Today` section is empty, extension adds a blank line at the top of the section
+-   merge the two YAML parsers; remove `yamljs` in favor of `yaml` (which has typescript types)
 
 ## [0.1.1] - 2021-11-02
 

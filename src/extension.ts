@@ -1,14 +1,12 @@
 import * as vscode from "vscode";
-import yaml = require("yamljs");
+import YAML = require('yaml');
+
 import { dayNames, daysPassed, daysSinceTheBeginningOfTime } from "./dates";
 import { dateLocaleOptions } from "./utilities";
 import { isCurrentRecurringItem, parseYamlTasks } from "./parseYamlTasks";
-
-const yamlDelimiter = "---";
-const yamlLastRunProperty = "lastAutoRun";
-const yamlRunOnOpenProperty = "runOnOpen";
-const yamlRunDaily = "runDaily";
-const autoRunInterval = 1000 * 60 * 60 * 3; // 3 hours
+import { autoRunInterval, yamlDelimiter, yamlLastRunProperty, yamlRunDaily, yamlRunOnOpenProperty } from "./constants";
+import { Settings } from "./Settings";
+import dayjs = require("dayjs");
 
 type SectionBounds = {
     first: number;
@@ -20,6 +18,7 @@ type SectionBounds = {
 export function activate(context: vscode.ExtensionContext) {
     // run on activation, if the "runOnOpen" parameter is set
     const textEditor = vscode.window.activeTextEditor;
+    let settings: Settings = new Settings();
     if (textEditor) {
         automaticPerformCopy(textEditor);
     }
@@ -35,6 +34,13 @@ export function activate(context: vscode.ExtensionContext) {
         }
     );
     context.subscriptions.push(disposable);
+
+    // get settings
+    if (textEditor) {
+        settings.readFromYaml(
+            getYamlSection(textEditor).join("\r\n")
+        );
+    }
 
     // automatic re-run
     const autoRunFunction = function () {
@@ -61,16 +67,8 @@ export function activate(context: vscode.ExtensionContext) {
     function automaticPerformCopy(editor: vscode.TextEditor) {
         if (yamlValue(editor, yamlRunOnOpenProperty)) {
             // we *should* run on open
-            // unless we have already run today
-
-            const lastRun = yamlValue(editor, yamlLastRunProperty);
-
-            if (
-                lastRun === undefined ||
-                daysPassed(new Date(lastRun.valueOf()), new Date()) !== 0
-            ) {
-                performCopyAndSave(editor);
-            }
+            // unless we have already run today (local time)
+            if (!settings.hasRunToday()) { performCopyAndSave(editor); }
         }
     }
 
@@ -78,12 +76,11 @@ export function activate(context: vscode.ExtensionContext) {
         editor: vscode.TextEditor,
         key: string
     ): string | undefined {
-        const yamlParsed = yaml.parse(getYamlSection(editor).join("\r\n"));
-        if (yamlParsed && key in yamlParsed) {
-            return yamlParsed[key] as string;
-        } else {
-            return undefined;
-        }
+        const yamlParsed = YAML.parse(getYamlSection(editor).join("\r\n"));
+
+        // TODO: why "tasks"?
+        if (!(yamlParsed && "tasks" in yamlParsed)) { return undefined; }
+        return yamlParsed[key] as string;
     }
 
     function performCopyAndSave(editor: vscode.TextEditor) {
@@ -93,7 +90,7 @@ export function activate(context: vscode.ExtensionContext) {
                 setYamlProperty(
                     editor,
                     yamlLastRunProperty,
-                    new Date().valueOf().toString()
+                    dayjs().toISOString()
                 )
             )
             .then(() =>

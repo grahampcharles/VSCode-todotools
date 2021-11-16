@@ -5,10 +5,10 @@ import { dayNames, dayNameToWeekday, daysPassed, todayDate, todayDay } from '../
 import { dateLocaleOptions } from '../../utilities';
 import { isCurrentRecurringItem, parseYamlTasks, RecurringTask } from '../../parseYamlTasks';
 import { expect } from 'chai';
-import { testYaml } from './testdata';
+import { testYaml, testYamlTasks } from './testdata';
+import YAML = require('yaml');
+import { Settings } from '../../Settings';
 import dayjs = require('dayjs');
-
-
 
 // test documentation -> https://mochajs.org/
 
@@ -26,20 +26,38 @@ suite('Extension Test Suite', () => {
 
 	});
 
+	test('yaml settings', () => {
+		let settings = new Settings();
+
+		// empty settings
+		expect(settings.hasRunToday()).to.be.false;
+		expect(settings.runOnOpen).to.be.false;
+		expect(settings.runDaily).to.be.false;
+		expect(settings.lastAutoRun.isValid()).to.be.false;
+
+		// default settings
+		settings.readFromYaml(testYaml);
+		expect(settings.hasRunToday(), "default settings: has run today").to.be.false;
+		expect(settings.runOnOpen, "default settings: runOnOpen").to.be.true;
+		expect(settings.runDaily, "default settings: runDaily").to.be.true;
+
+	});
+
 	test('date locale options', () => {
 		expect(dateLocaleOptions()).to.have.lengthOf(12);
 	});
 
 	test('yaml parsing', () => {
 
-		const tasks = parseYamlTasks(testYaml.join("\r\n"));
-		assert.strictEqual(testYaml.length - 1, tasks.length);
+		const tasks = parseYamlTasks(testYamlTasks);
+		const yamlTaskArray = testYamlTasks.split("\r\n");
+
 		assert.strictEqual(tasks[0].name, "mow lawn");
 		assert.strictEqual(tasks[0].recurAfter, 2);
 		assert.strictEqual(tasks[1].name, "eat groceries");
 		assert.strictEqual(tasks[1].recurAfter, 1);
 
-		expect(tasks.length).eql(testYaml.length - 1);
+		expect(tasks.length).eql(yamlTaskArray.length - 1);
 
 		const shopping = tasks.filter(e => e.name === "shop");
 		expect(shopping).to.have.lengthOf(1);

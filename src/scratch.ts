@@ -1,12 +1,10 @@
-import { daysPassed, daysSinceTheBeginningOfTime } from "./dates";
-import { isCurrentRecurringItem, parseYamlTasks } from "./parseYamlTasks";
+import dayjs = require("dayjs");
+import YAML = require("yaml");
 import { testYaml } from "./test/suite/testdata";
 
-const tasks = parseYamlTasks(testYaml.join("\r\n"));
+//const settings = YAML.parse(testYaml);
+//console.log(settings);
 
-console.log(tasks);
-console.log("filtered");
-console.log(`day ${daysSinceTheBeginningOfTime}`);
-console.log(tasks.filter((item) => {
-    return isCurrentRecurringItem(item);
-}));
+const day = dayjs();
+
+console.log(day.format("YYYY-MM-DDThh:nnZ"));
