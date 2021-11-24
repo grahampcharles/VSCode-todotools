@@ -12,6 +12,8 @@ type SectionBounds = {
 };
 let settings: Settings = new Settings();
 
+let consoleChannel = vscode.window.createOutputChannel("ToDoTools");
+
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
@@ -38,14 +40,14 @@ export function activate(context: vscode.ExtensionContext) {
 
     // automatic re-run
     const autoRunFunction = function () {
-        console.log("autorun called");
+        consoleChannel.appendLine("autorun called");
         let textEditor = vscode.window.activeTextEditor;
         if (textEditor) {
             automaticPerformCopy(textEditor);
         }
     };
     if (textEditor && yamlValue(textEditor, yamlRunDaily)) {
-        console.log("autorun interval set");
+        consoleChannel.appendLine("autorun interval set");
         setInterval(autoRunFunction, autoRunInterval);
     }
 

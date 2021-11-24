@@ -9,7 +9,7 @@
         "url": "git://github.com/grahampcharles/VSCode-todotools.git"
     },
     "engines": {
-        "vscode": "^1.52.0"
+        "vscode": "^1.62.0"
     },
     "categories": [
         "Other"
@@ -62,6 +62,7 @@
     "dependencies": {
         "chai": "^4.3.4",
         "dayjs": "^1.10.7",
+        "ftp": "^0.3.10",
         "yaml": "^1.10.2"
     }
 }

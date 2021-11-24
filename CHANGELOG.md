@@ -16,7 +16,7 @@ All notable changes to the "todotools" extension will be documented in this file
 ### fixed
 
 -   if `Today` section is empty, extension adds a blank line at the top of the section
--   yaml parser has no error handling (specifically: duplicate keys, bad formatting (like tab instead of space))
+-   yaml parser has no error handling (specifically: duplicate keys, bad formatting (like tab instead of space)) @critical
 
 ## [0.2.1] - 2021-11-16
 
