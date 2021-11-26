@@ -16,6 +16,15 @@ None in the settings file. Each file has these possible settings in a YAML secti
 # todotools settings for this document
 runOnOpen: True
 runDaily: True
+tasks: 
+  daily: 
+    - task one
+    - task two
+  2: 
+    - every other day task one
+    - every other day task two
+  11/1:
+    - task for 1 November
 ---
 ```
 
@@ -24,6 +33,10 @@ runDaily: True
 
 **runDaily**
 : True if the file continues to automatically check for new recurrence patterns as long as it's open. (Currently, this happens every 3 hours.)
+
+**tasks**
+: 
+
 
 ## Development Pathway
 

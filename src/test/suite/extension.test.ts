@@ -4,14 +4,14 @@ import * as chai from 'chai';
 import { dayNames, dayNameToWeekday, daysPassed, todayDay, todayName } from '../../dates';
 import { isCurrentRecurringItem, parseYamlTasks, RecurringTask } from '../../yaml-utilities';
 import { expect } from 'chai';
-import { testYaml, testYamlTasks, testYamlTasksComplex, testYamlToday } from './testdata';
+import { testYaml, testYamlTasks, testYamlToday } from './testdata';
 import YAML = require('yaml');
 import { Settings } from '../../Settings';
 import dayjs = require('dayjs');
 
 suite('Extension Test Suite', () => {
 	vscode.window.showInformationMessage('Start all tests.');
-
+	
 	test('date functions', () => {
 		const date1 = new Date(2020, 1, 3);
 		const date2 = new Date(2020, 1, 5);
@@ -53,11 +53,9 @@ suite('Extension Test Suite', () => {
 		const yamlTaskArray = testYamlTasks.split("\r\n");
 
 		assert.strictEqual(tasks[0].name, "mow lawn");
-		assert.strictEqual(tasks[0].recurAfter, 2);
+		assert.strictEqual(tasks[0].recurAfter, 1);
 		assert.strictEqual(tasks[1].name, "eat groceries");
-		assert.strictEqual(tasks[1].recurAfter, 1);
-
-		expect(tasks.length).eql(yamlTaskArray.length - 1);
+		assert.strictEqual(tasks[1].recurAfter, 2);
 
 		const shopping = tasks.filter(e => e.name === "shop");
 		expect(shopping).to.have.lengthOf(1);
@@ -68,16 +66,6 @@ suite('Extension Test Suite', () => {
 
 		const xmas = tasks.filter(e => e.name === "start XMas shopping")[0];
 		expect(xmas).property("dateAnnual").eql("12-01");
-
-		const novalue = tasks.filter(e => e.name === "daily with no value")[0];
-		expect(novalue).property("recurAfter").eql(1);
-
-	});
-
-	test('yaml parsing, complex', () => {
-
-		const tasks = parseYamlTasks(testYamlTasksComplex);
-		expect(tasks.length).eql(11);
 
 	});
 

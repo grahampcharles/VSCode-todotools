@@ -1,26 +1,21 @@
 Today:
 	- whatever's already here
-	- test every Tuesday
-	- test Nov. 16 item
-	- test daily 1
-	- test daily 2
 
 ---
 # todotools settings for this document
 runOnOpen: True
 runDaily: True
-tasks:
-  mow lawn: 2
-  test daily 1: 1
-  test daily 2: 1
-  test other day: 2
-  test third day: 3
-  test fourth day: 4
-  test fifth day: 5
-  test monthly: 30	
-  test every Monday: Monday
-  test every Tuesday: Tuesday
-  every Saturday test: Saturday
-  test Nov. 16 item: 11/16
-lastAutoRun: 2021-11-16T19:53:12.949Z
+tasks: 
+  daily: 
+    - test daily 1
+    - test daily 2
+  2: 
+    - every other day task one
+    - every other day task two
+  11/1:
+    - task for 1 November
+  monthly: 
+    test monthly
+  Saturday:
+    every Saturday test
 ---

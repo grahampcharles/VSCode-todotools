@@ -1,30 +1,27 @@
 import dayjs = require("dayjs");
 
-export const testYamlTasks = [
-  "tasks:",
-  "  mow lawn: 2",
-  "  eat groceries: 1",
-  "  daily with no value: 1",
-  "  also eat groceries: 3",
-  "  again, eat groceries: 4",
-  "  fifth eat groceries: 5",
-  "  every other day again: 2",
-  "  shop: Mondays",
-  "  start XMas shopping: 12/1",
-  "  pay taxes: 11/14/2021"].join("\r\n");
-
-export const testYamlTasksComplex = `tasks:
-  mow lawn: 2
-  test daily 1: 1
-  test daily 2: 1
-  test other day: 2
-  test third day: 3
-  test fourth day: 4
-  test fifth day: 5
-  test monthly: 30	
-  test every Monday: Monday
-  every Saturday test: Saturday
-  test Nov. 2 item: 11/02`;
+export const testYamlTasks = `# todotools settings for this document
+runOnOpen: True
+runDaily: True
+tasks: 
+  daily: 
+    - mow lawn
+  2: 
+    - eat groceries
+    - every other day task two
+  Tuesday:
+    - shopping
+  11/1:
+    - task for 1 November
+  11/14/2021:
+    - pay taxes
+  12/1:
+    - start XMas shopping
+  monthly: 
+    - test monthly
+  Saturday:
+    - every Saturday test
+`;
 
 export const testYaml = [
   "# todotools settings for this document",
