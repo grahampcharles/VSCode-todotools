@@ -48,7 +48,8 @@ export type RecurringTask = {
     recurAfter?: number,     // every n days (1 = every day, 2 = every other, etc.)
     dateAnnual?: string,     // date without a year, in YYYY-MM-DD format
     dateOnce?: string,       // date with a year, in YYYY-MM-DD
-    dayOfWeek?: number       // day of week
+    dayOfWeek?: number,      // day of week
+    dayOfMonth?: number      // day of month
 };
 
 
@@ -101,7 +102,8 @@ function yamlToTask(input: TaskInputType): RecurringTask {
         
         // certain constants
         if (input.toLowerCase() === "daily") {return { recurAfter: 1 };}
-        
+        if (input.toLowerCase() === "monthly") {return { dayOfMonth: 1 };}
+
         // day of week
         const dayOfWeek = dayNameToWeekday(input);
         if (dayOfWeek !== -1) { return { dayOfWeek: dayOfWeek }; };
