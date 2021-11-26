@@ -61,11 +61,16 @@ suite('Extension Test Suite', () => {
 		expect(shopping).to.have.lengthOf(1);
 		expect(shopping[0]).property("dayOfWeek").eql(1);
 
-		const taxes = tasks.filter(e => e.name === "pay taxes")[0];
-		expect(taxes).property("dateOnce").eql("2021-11-14");
+		const taxes = tasks.filter(e => e.name === "pay taxes");
+		expect(taxes).to.have.lengthOf(2);
+		expect(taxes[0]).property("dateOnce").eql("2021-11-14");
+		expect(taxes[1]).property("dateOnce").eql("2022-04-10");
 
 		const xmas = tasks.filter(e => e.name === "start XMas shopping")[0];
 		expect(xmas).property("dateAnnual").eql("12-01");
+
+		const rent = tasks.filter (e => e.name === "pay rent")[0];
+		expect(rent).property("dayOfMonth").eql(1);
 
 	});
 

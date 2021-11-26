@@ -15,13 +15,14 @@ tasks:
     - task for 1 November
   11/14/2021:
     - pay taxes
+  4/10/2022:
+    - pay taxes
   12/1:
     - start XMas shopping
   monthly: 
-    - test monthly
+    - pay rent
   Saturday:
     - every Saturday test
-    - mow lawn
 `;
 
 export const testYaml = [
