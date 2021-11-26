@@ -7,96 +7,106 @@ All notable changes to the "todotools" extension will be documented in this file
 
 ### added
 
--   support "monthly" again
--   remove contents of dated "one time only" section, like "11/2/2021"
--   clean the yaml a bit
--   support subsections within the yaml (e.g. "daily")
--   reports yaml parser errors
+- support "monthly" again
+- remove contents of dated "one time only" section, like "11/2/2021"
+- clean the yaml a bit
+- support subsections within the yaml (e.g. "daily")
+- reports yaml parser errors
 
 ### fixed
 
--   if `Today` section is empty, extension adds a blank line at the top of the section
--   yaml parser has no error handling (specifically: duplicate keys, bad formatting (like tab instead of space)) @critical
+- if `Today` section is empty, extension adds a blank line at the top of the section
+
+## [0.3.1] - 2021-11-26
+
+### changed
+
+- adjusted YAML format (again ;))
+
+### fixed
+
+- if `Today` section is empty, extension adds a blank line at the top of the section
+- yaml parser has no error handling (specifically: duplicate keys, bad formatting (like tab instead of space)) @critical
 
 ## [0.2.1] - 2021-11-16
 
 ### fixed
 
--   autoruns even if a day has not passed
+- autoruns even if a day has not passed
 
 ## [0.2.0] - 2021-11-16
 
 ### fixed
 
--   repeats existing tasks
--   merge the two YAML parsers; remove `yamljs` in favor of `yaml` (which has typescript types)
+- repeats existing tasks
+- merge the two YAML parsers; remove `yamljs` in favor of `yaml` (which has typescript types)
 
 ## [0.1.1] - 2021-11-02
 
 ### added
 
--   arbitrary future date items in the format `mm-dd` or `yyyy-mm-dd`
+- arbitrary future date items in the format `mm-dd` or `yyyy-mm-dd`
 
 ## [0.1.0] - 2021-10-25
 
 ### fixed:
 
--   set date to GMT date
--   make sure update isn't happening twice (perhaps related to above) like when lastCheckDate appears to be in the future
+- set date to GMT date
+- make sure update isn't happening twice (perhaps related to above) like when lastCheckDate appears to be in the future
 
 ## [0.0.9] - 2021-04-03
 
 ### added:
 
--   autosave when auto-running
--   auto-rerun every hour if file is open
+- autosave when auto-running
+- auto-rerun every hour if file is open
 
 ## [0.0.8] - 2021-02-20
 
 ### Fixed
 
--   edits not being executed
+- edits not being executed
 
 ## [0.0.7] - 2021-02-20
 
 ### Fixed
 
--   day-of-week clears one too many lines, including the next section name if it's close enough
+- day-of-week clears one too many lines, including the next section name if it's close enough
 
 ## [0.0.6] - 2021-02-01
 
 ### Added
 
--   opinionated day-of-week cues:
-    -   `Weekday Name (singular): (e.g. "Sunday")` for one-time tasks (e.g. "next Sunday")
-    -   `Weekday Name (singular): (e.g. "Sundays")` for recurring tasks (e.g. "every Sunday")
+- opinionated day-of-week cues:
+  - `Weekday Name (singular): (e.g. "Sunday")` for one-time tasks (e.g. "next Sunday")
+  - `Weekday Name (singular): (e.g. "Sundays")` for recurring tasks (e.g. "every Sunday")
 
 ## [0.0.5]
 
 ### Added
 
--   days-of-the-week cues
+- days-of-the-week cues
 
 ## [0.0.4]
 
 ### Added
 
--   Added YAML property to prevent autorun more than once per day.
+- Added YAML property to prevent autorun more than once per day.
 
 ## [0.0.3]
 
 ### Added
 
--   activationEvents call.
+- activationEvents call.
 
 ## [0.0.2]
 
 ### Added
 
--   a simple recurrence section: "Every Third Day"
+- a simple recurrence section: "Every Third Day"
 
 ## [0.0.1]
 
 ### Added
 
--   In-house release.
+- In-house release.

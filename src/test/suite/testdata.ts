@@ -21,6 +21,7 @@ tasks:
     - test monthly
   Saturday:
     - every Saturday test
+    - mow lawn
 `;
 
 export const testYaml = [
