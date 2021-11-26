@@ -32,6 +32,15 @@ export function getYamlSection(editor: vscode.TextEditor): string[] {
         taskname: recurrence days
         taskname: recurrence day of the week (e.g., "Fridays")
         taskname: specific day of the year
+
+
+    new yaml format:
+    tasks:
+        sectionname:   # recurrence pattern
+            - taskname
+            - taskname
+
+
 */
 
 export type RecurringTask = {
@@ -71,12 +80,16 @@ export function parseYamlTasks(yamlSection: string): RecurringTask[] {
     if (!(tree && "tasks" in tree)) { return []; }
     const tasks = tree["tasks"];
 
-    return Object.keys(tasks).map((key: string) => {
-        return { name: key, ...yamlToTask(tasks[key] as number) } as RecurringTask;
+    return Object.keys(tasks).flatMap((pattern: string) => {
+        const taskProps = yamlToTask(pattern);
+        return tasks[pattern].map ( (key: string) =>{ 
+            return ({ name: key, ...taskProps } as RecurringTask)}
+        );
     });
 }
 
 type TaskInputType = number | string;
+
 
 function yamlToTask(input: TaskInputType): RecurringTask {
 
@@ -85,6 +98,10 @@ function yamlToTask(input: TaskInputType): RecurringTask {
     }
 
     if (typeof input === "string") {
+        
+        // certain constants
+        if (input.toLowerCase() === "daily") {return { recurAfter: 1 };}
+        
         // day of week
         const dayOfWeek = dayNameToWeekday(input);
         if (dayOfWeek !== -1) { return { dayOfWeek: dayOfWeek }; };
