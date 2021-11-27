@@ -10,7 +10,7 @@ tasks:
     - eat groceries
     - every other day task two
   Tuesday:
-    - shopping
+    - shop
   11/1:
     - task for 1 November
   11/14/2021:

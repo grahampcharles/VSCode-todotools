@@ -94,11 +94,10 @@ export function parseYamlTasks(yamlSection: string): RecurringTask[] {
 type TaskInputType = number | string;
 
 
-function yamlToTask(input: TaskInputType): RecurringTask {
+export function yamlToTask(input: TaskInputType): RecurringTask {
 
-    if (typeof input === "number") {
-        return { recurAfter: input };
-    }
+    // is this a number | numeric string?
+    if (!isNaN(+input)) { return { recurAfter: +input }; }
 
     if (typeof input === "string") {
 
@@ -111,14 +110,20 @@ function yamlToTask(input: TaskInputType): RecurringTask {
         if (dayOfWeek !== -1) { return { dayOfWeek: dayOfWeek }; };
 
         // date without a year
-        var theDate = dayjs("1600-".concat(input));       // concatenating 1600 to the beginning lets us detect dates without years
-        if (theDate.isValid()) {
-            return { dateAnnual: theDate.format('MM-DD') };
-        }
-        // date with a year
-        theDate = dayjs(input);
-        if (theDate.isValid()) {
-            return { dateOnce: theDate.format('YYYY-MM-DD') };
+        if (input.length <= 5) {
+            // concatenating 1600 to the beginning helps 
+            // us detect dates without years
+            var theDate = dayjs("1600-".concat(input));
+            if (theDate.isValid()) {
+                return { dateAnnual: theDate.format('MM-DD') };
+            }
+        } else {
+
+            // date with a year
+            theDate = dayjs(input);
+            if (theDate.isValid()) {
+                return { dateOnce: theDate.format('YYYY-MM-DD') };
+            }
         }
     }
 

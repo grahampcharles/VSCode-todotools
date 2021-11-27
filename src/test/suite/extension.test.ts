@@ -2,7 +2,7 @@ import * as assert from 'assert';
 import * as vscode from 'vscode';
 import * as chai from 'chai';
 import { dayNames, dayNameToWeekday, daysPassed, todayDay, todayName } from '../../dates';
-import { isCurrentRecurringItem, parseYamlTasks, RecurringTask } from '../../yaml-utilities';
+import { isCurrentRecurringItem, parseYamlTasks, RecurringTask, yamlToTask } from '../../yaml-utilities';
 import { expect } from 'chai';
 import { testYaml, testYamlTasks, testYamlToday } from './testdata';
 import YAML = require('yaml');
@@ -11,7 +11,7 @@ import dayjs = require('dayjs');
 
 suite('Extension Test Suite', () => {
 	vscode.window.showInformationMessage('Start all tests.');
-	
+
 	test('date functions', () => {
 		const date1 = new Date(2020, 1, 3);
 		const date2 = new Date(2020, 1, 5);
@@ -47,30 +47,40 @@ suite('Extension Test Suite', () => {
 
 	});
 
+	test('convert yaml to task', () => {
+
+		expect(yamlToTask('2')).property('recurAfter').eql(2, "recurAfter");
+		expect(yamlToTask('Monday')).property('dayOfWeek').eql(1, "dayOfWeek");
+		expect(yamlToTask('Jan. 2, 2001')).property('dateOnce').eql("2001-01-02", "dateOnce");
+		expect(yamlToTask('1/2')).property('dateAnnual').eql("01-02", "dateAnnual");
+		expect(yamlToTask('monthly')).property('dayOfMonth').eql(1, "dayOfMonth");
+
+	});
+
 	test('yaml parsing', () => {
 
 		const tasks = parseYamlTasks(testYamlTasks);
 		const yamlTaskArray = testYamlTasks.split("\r\n");
 
-		assert.strictEqual(tasks[0].name, "mow lawn");
-		assert.strictEqual(tasks[0].recurAfter, 1);
-		assert.strictEqual(tasks[1].name, "eat groceries");
-		assert.strictEqual(tasks[1].recurAfter, 2);
+		assert.strictEqual(tasks[0].name, "eat groceries");
+		assert.strictEqual(tasks[0].recurAfter, 2, 'tasks-0-recurAfter');
+		assert.strictEqual(tasks[2].name, "mow lawn");
+		assert.strictEqual(tasks[2].recurAfter, 1);
 
 		const shopping = tasks.filter(e => e.name === "shop");
-		expect(shopping).to.have.lengthOf(1);
-		expect(shopping[0]).property("dayOfWeek").eql(1);
+		expect(shopping).to.have.lengthOf(1, "shopping");
+		expect(shopping[0]).property("dayOfWeek").eql(2, "shopping: Tuesday");
 
 		const taxes = tasks.filter(e => e.name === "pay taxes");
-		expect(taxes).to.have.lengthOf(2);
+		expect(taxes).to.have.lengthOf(2, 'taxes-lengthOf');
 		expect(taxes[0]).property("dateOnce").eql("2021-11-14");
 		expect(taxes[1]).property("dateOnce").eql("2022-04-10");
 
 		const xmas = tasks.filter(e => e.name === "start XMas shopping")[0];
 		expect(xmas).property("dateAnnual").eql("12-01");
 
-		const rent = tasks.filter (e => e.name === "pay rent")[0];
-		expect(rent).property("dayOfMonth").eql(1);
+		const rent = tasks.filter(e => e.name === "pay rent")[0];
+		expect(rent).property("dayOfMonth").eql(1, "dayOfMonth");
 
 	});
 
