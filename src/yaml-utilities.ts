@@ -64,9 +64,9 @@ export function isCurrentRecurringItem(task: RecurringTask): boolean {
 
     if (task.recurAfter && (daysSinceTheBeginningOfTime % task.recurAfter === 0)) { return true; };
     if (task.dateAnnual && (dayjs(task.dateAnnual).format("MM-DD") === dayjs().format("MM-DD"))) { return true; }
-    if (task.dateOnce && (dayjs(task.dateOnce).format("YYYY-MM-DD") === dayjs().format("YYYY-MM-DD"))) { return true; }    
+    if (task.dateOnce && (dayjs(task.dateOnce).format("YYYY-MM-DD") === dayjs().format("YYYY-MM-DD"))) { return true; }
     if (task.dayOfWeek && (todayDay.day() === task.dayOfWeek)) { return true; }
-    if (task.dayOfMonth && (todayDay.date() === task.dayOfMonth )) { return true; }
+    if (task.dayOfMonth && (todayDay.date() === task.dayOfMonth)) { return true; }
 
     return false;
 
@@ -84,8 +84,9 @@ export function parseYamlTasks(yamlSection: string): RecurringTask[] {
 
     return Object.keys(tasks).flatMap((pattern: string) => {
         const taskProps = yamlToTask(pattern);
-        return tasks[pattern].map ( (key: string) =>{ 
-            return ({ name: key, ...taskProps } as RecurringTask)}
+        return tasks[pattern].map((key: string) => {
+            return ({ name: key, ...taskProps } as RecurringTask);
+        }
         );
     });
 }
@@ -100,10 +101,10 @@ function yamlToTask(input: TaskInputType): RecurringTask {
     }
 
     if (typeof input === "string") {
-        
+
         // certain constants
-        if (input.toLowerCase() === "daily") {return { recurAfter: 1 };}
-        if (input.toLowerCase() === "monthly") {return { dayOfMonth: 1 };}
+        if (input.toLowerCase() === "daily") { return { recurAfter: 1 }; }
+        if (input.toLowerCase() === "monthly") { return { dayOfMonth: 1 }; }
 
         // day of week
         const dayOfWeek = dayNameToWeekday(input);
