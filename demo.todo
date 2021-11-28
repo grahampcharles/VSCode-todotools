@@ -7,15 +7,23 @@ runOnOpen: True
 runDaily: True
 tasks: 
   daily: 
-    - test daily 1
-    - test daily 2
+    - mow lawn
   2: 
-    - every other day task one
+    - eat groceries
     - every other day task two
+  Tuesday:
+    - shop
   11/1:
     - task for 1 November
+  11/14/2021:
+    - pay taxes
+  4/10/2022:
+    - pay taxes
+  12/1:
+    - start XMas shopping
   monthly: 
-    test monthly
+    - pay rent
   Saturday:
-    every Saturday test
+    - every Saturday test
+lastAutoRun: 2021-11-27T03:53:32.690Z
 ---

@@ -79,18 +79,29 @@ export function activate(context: vscode.ExtensionContext) {
 
     function performCopyAndSave(editor: vscode.TextEditor) {
         // do the copy and update the last run flag
-        performCopy(editor)
-            .then(() =>
-                setYamlProperty(
-                    editor,
-                    yamlLastRunProperty,
-                    dayjs().toISOString()
+        try {
+            performCopy(editor)
+                .then(() =>
+                    setYamlProperty(
+                        editor,
+                        yamlLastRunProperty,
+                        dayjs().toISOString()
+                    )
                 )
-            )
-            .then(() =>
-                // save after making the changes
-                editor.document.save()
-            );
+                .then(() =>
+                    // save after making the changes
+                    editor.document.save()
+                )
+                .catch((reason: any) => {
+                    if (reason instanceof Error) {
+                        console.log(reason.message);
+                    }
+                });
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                console.log(err.message);
+            }
+        }
     }
 
     async function performCopy(
