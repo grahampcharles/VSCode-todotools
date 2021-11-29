@@ -17,6 +17,12 @@ All notable changes to the "todotools" extension will be documented in this file
 -   extension is not running; feature contributions are not made
 -   if `Today` section is empty, extension adds a blank line at the top of the section
 
+## [0.3.2] - Unreleased
+
+### fixed
+
+-   Sunday not working ; other days fine
+
 ## [0.3.1] - 2021-11-26
 
 ### added

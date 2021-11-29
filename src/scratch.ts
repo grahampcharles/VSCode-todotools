@@ -1,7 +1,29 @@
 import dayjs = require("dayjs");
 import YAML = require("yaml");
-import { parseYamlTasks, yamlToTask } from "./yaml-utilities";
+import { isCurrentRecurringItem, parseYamlTasks, RecurringTask, yamlToTask } from "./yaml-utilities";
 import { testYaml, testYamlTasks } from "./test/suite/testdata";
+import { dayNames, todayDay } from "./dates";
+import utc = require('dayjs/plugin/utc');
+import timezone = require('dayjs/plugin/timezone');
 
-const tasks = parseYamlTasks(testYamlTasks);
-console.log(tasks);
+// work in the local time zone
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.tz.guess();
+
+
+// const tasks = parseYamlTasks(testYamlTasks);
+// console.log(tasks);
+
+const dayName = "Mondays";
+
+// console.log(dayName.replace(/s$/g, ''));
+// console.log(dayNames.indexOf(dayName.replace(/s$/g, '')));
+
+let testItem: RecurringTask = {
+    name: "test task",
+    dayOfWeek: todayDay.get('day')
+};
+
+console.log(testItem.dayOfWeek);
+console.log(isCurrentRecurringItem(testItem));

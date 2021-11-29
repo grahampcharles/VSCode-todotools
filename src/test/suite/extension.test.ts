@@ -51,6 +51,7 @@ suite('Extension Test Suite', () => {
 
 		expect(yamlToTask('2')).property('recurAfter').eql(2, "recurAfter");
 		expect(yamlToTask('Monday')).property('dayOfWeek').eql(1, "dayOfWeek");
+		expect(yamlToTask('Mondays')).property('dayOfWeek').eql(1, "dayOfWeek-pluralized");
 		expect(yamlToTask('Jan. 2, 2001')).property('dateOnce').eql("2001-01-02", "dateOnce");
 		expect(yamlToTask('1/2')).property('dateAnnual').eql("01-02", "dateAnnual");
 		expect(yamlToTask('monthly')).property('dayOfMonth').eql(1, "dayOfMonth");
@@ -98,7 +99,6 @@ suite('Extension Test Suite', () => {
 		// dateOnce is not today
 		testItem.dateOnce = yesterday.format("YYYY-MM-DD");
 		expect(isCurrentRecurringItem(testItem)).to.be.false;
-
 		delete testItem.dateOnce;
 
 		// dateAnnual is today
@@ -108,7 +108,6 @@ suite('Extension Test Suite', () => {
 		// dateAnnual is not today
 		testItem.dateAnnual = yesterday.format("MM-DD");
 		expect(isCurrentRecurringItem(testItem)).to.be.false;
-
 		delete testItem.dateAnnual;
 
 		// dayOfWeek is today's

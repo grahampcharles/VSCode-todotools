@@ -1,6 +1,13 @@
 import * as vscode from "vscode";
 import YAML = require('yaml');
 import dayjs = require('dayjs');
+import utc = require('dayjs/plugin/utc');
+import timezone = require('dayjs/plugin/timezone');
+
+// work in the local time zone
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.tz.guess();
 
 import { yamlDelimiter } from "./constants";
 import { dayNameToWeekday, daysSinceTheBeginningOfTime, todayDay } from "./dates";
@@ -62,18 +69,17 @@ export type RecurringTask = {
  */
 export function isCurrentRecurringItem(task: RecurringTask): boolean {
 
-    if (task.recurAfter && (daysSinceTheBeginningOfTime % task.recurAfter === 0)) { return true; };
-    if (task.dateAnnual && (dayjs(task.dateAnnual).format("MM-DD") === dayjs().format("MM-DD"))) { return true; }
-    if (task.dateOnce && (dayjs(task.dateOnce).format("YYYY-MM-DD") === dayjs().format("YYYY-MM-DD"))) { return true; }
-    if (task.dayOfWeek && (todayDay.day() === task.dayOfWeek)) { return true; }
-    if (task.dayOfMonth && (todayDay.date() === task.dayOfMonth)) { return true; }
+    if (task.recurAfter !== undefined && (daysSinceTheBeginningOfTime % task.recurAfter === 0)) { return true; };
+    if (task.dateAnnual !== undefined && (dayjs(task.dateAnnual).format("MM-DD") === dayjs().format("MM-DD"))) { return true; }
+    if (task.dateOnce !== undefined && (dayjs(task.dateOnce).format("YYYY-MM-DD") === dayjs().format("YYYY-MM-DD"))) { return true; }
+    if (task.dayOfWeek !== undefined && (todayDay.day() === task.dayOfWeek)) { return true; }
+    if (task.dayOfMonth !== undefined && (todayDay.date() === task.dayOfMonth)) { return true; }
 
     return false;
 
 };
 
 // TODO: allow duplicate-named tasks
-
 export function parseYamlTasks(yamlSection: string): RecurringTask[] {
 
     const tree = YAML.parse(yamlSection);
@@ -92,7 +98,6 @@ export function parseYamlTasks(yamlSection: string): RecurringTask[] {
 }
 
 type TaskInputType = number | string;
-
 
 export function yamlToTask(input: TaskInputType): RecurringTask {
 

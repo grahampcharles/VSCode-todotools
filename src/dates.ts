@@ -1,5 +1,12 @@
 // days of the week
 import dayjs = require("dayjs");
+import utc = require('dayjs/plugin/utc');
+import timezone = require('dayjs/plugin/timezone');
+
+// work in the local time zone
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.tz.guess();
 
 // TODO: i8n
 export const dayNames = [
@@ -16,7 +23,7 @@ export const dayNames = [
 /// returns -1 on nonexistent
 export function dayNameToWeekday(dayName: string): number {
 
-    // find the singular version of the day name
+    // find the singular version of the day name (including plural of day name)
     return dayNames.indexOf(dayName.replace(/s$/g, ''));
 
 }
