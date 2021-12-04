@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import dayjs = require("dayjs");
 import YAML = require("yaml");
-import { getYamlSection } from "./yaml-utilities";
+import { cleanYaml, getYamlSection } from "./yaml-utilities";
 
 export class Settings {
     runOnOpen: boolean = false;
@@ -20,7 +20,7 @@ export class Settings {
     }
 
     readFromYaml(yamlString: string): void {
-        const yamlSettings = YAML.parse(yamlString);
+        const yamlSettings = YAML.parse(cleanYaml(yamlString));
         if (typeof yamlSettings === "undefined") { return; }
 
         // TODO: there has to be a typescript-safe loop that will do this

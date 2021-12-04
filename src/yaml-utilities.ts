@@ -78,6 +78,17 @@ export function isCurrentRecurringItem(task: RecurringTask): boolean {
 
 };
 
+
+/**
+ *cleanYaml
+ *Cleans the YAML section of tabs.
+ * @param {string} input
+ * @return {*}  {string}
+ */
+export function cleanYaml(input: string): string {
+    return input.replace(/\t/g, "  ");
+}
+
 /**
  *parseYamlTasks
  *Parses the "tasks" value of a YAML string into a recurring tasks array.
@@ -85,17 +96,14 @@ export function isCurrentRecurringItem(task: RecurringTask): boolean {
  * @param {string} yamlSection The contents of the YAML task section.
  * @return {*}  {RecurringTask[]}
  */
-
-
 export function parseYamlTasks(yamlSection: string): RecurringTask[] {
 
     let tree: any;
 
     // try to parse the whole tree
     try {
-        tree = YAML.parse(yamlSection, { uniqueKeys: false, prettyErrors: true, strict: false });
+        tree = YAML.parse(cleanYaml(yamlSection), { uniqueKeys: false, prettyErrors: true, strict: false });
     } catch (error) {
-        //if (error instanceof YAML.YAMLError) {
         if (error instanceof Error) {
             vscode.window.showInformationMessage(error.message);
         }

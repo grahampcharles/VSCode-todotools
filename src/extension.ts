@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import YAML = require('yaml');
 
-import { getYamlSection, isCurrentRecurringItem, parseYamlTasks } from "./yaml-utilities";
+import { cleanYaml, getYamlSection, isCurrentRecurringItem, parseYamlTasks } from "./yaml-utilities";
 import { autoRunInterval, yamlDelimiter, yamlLastRunProperty, yamlRunDaily, yamlRunOnOpenProperty } from "./constants";
 import { Settings } from "./Settings";
 import dayjs = require("dayjs");
@@ -71,7 +71,7 @@ export function activate(context: vscode.ExtensionContext) {
         editor: vscode.TextEditor,
         key: string
     ): string | undefined {
-        const yamlParsed = YAML.parse(getYamlSection(editor).join("\r\n"));
+        const yamlParsed = YAML.parse(cleanYaml(getYamlSection(editor).join("\r\n")));
 
         if (!(yamlParsed && key in yamlParsed)) { return undefined; }
         return yamlParsed[key] as string;

@@ -7,15 +7,23 @@ All notable changes to the "todotools" extension will be documented in this file
 
 ### added
 
--   reports yaml parser errors
 -   remove contents of dated "one time only" section, like "11/2/2021"
--   clean the yaml a bit
 -   support subsections within the yaml (e.g. "daily")
 
 ### fixed
 
--   extension is not running; feature contributions are not made
 -   if `Today` section is empty, extension adds a blank line at the top of the section
+
+## [0.3.3] - 2021-12-04
+
+### added
+
+-   reports yaml parser errors
+-   clean the yaml a bit
+
+### fixed
+
+-   extension is not running; feature contributions are not made
 
 ## [0.3.2] - 2021-11-28
 

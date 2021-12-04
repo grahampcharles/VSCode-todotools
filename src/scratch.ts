@@ -28,8 +28,9 @@ dayjs.tz.guess();
 // console.log(testItem.dayOfWeek);
 // console.log(isCurrentRecurringItem(testItem));
 
+
 try {
-    const ret = YAML.parse(testYamlTasks2, { uniqueKeys: false, prettyErrors: true, strict: false });
+    const ret = YAML.parse(testYamlTasks2.replace(/\t/, "  "), { uniqueKeys: false, prettyErrors: true, strict: false });
     console.log(ret);
 } catch (error) {
     if (error instanceof Error) {
