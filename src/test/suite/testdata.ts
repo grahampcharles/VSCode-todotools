@@ -25,6 +25,29 @@ tasks:
     - every Saturday test
 `;
 
+export const testYamlTasks2 = `
+tasks: 
+  daily: 
+  \t- mow lawn
+  2: 
+    - eat groceries
+    - every other day task two
+  Tuesday:
+    - shop
+  11/1:
+    - task for 1 November
+  11/14/2021:
+    - pay taxes
+  4/10/2022:
+    - pay taxes
+  12/1:
+    - start XMas shopping
+  monthly: 
+    - pay rent
+  Saturday:
+    - every Saturday test
+`;
+
 export const testYaml = [
   "# todotools settings for this document",
   "runOnOpen: True",

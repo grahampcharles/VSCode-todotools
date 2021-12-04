@@ -1,7 +1,7 @@
 import dayjs = require("dayjs");
 import YAML = require("yaml");
-import { isCurrentRecurringItem, parseYamlTasks, RecurringTask, yamlToTask } from "./yaml-utilities";
-import { testYaml, testYamlTasks } from "./test/suite/testdata";
+import { getYamlSection, isCurrentRecurringItem, parseYamlTasks, RecurringTask, yamlToTask } from "./yaml-utilities";
+import { testYaml, testYamlTasks, testYamlTasks2 } from "./test/suite/testdata";
 import { dayNames, todayDay } from "./dates";
 import utc = require('dayjs/plugin/utc');
 import timezone = require('dayjs/plugin/timezone');
@@ -15,15 +15,24 @@ dayjs.tz.guess();
 // const tasks = parseYamlTasks(testYamlTasks);
 // console.log(tasks);
 
-const dayName = "Mondays";
+// const dayName = "Mondays";
 
 // console.log(dayName.replace(/s$/g, ''));
 // console.log(dayNames.indexOf(dayName.replace(/s$/g, '')));
 
-let testItem: RecurringTask = {
-    name: "test task",
-    dayOfWeek: todayDay.get('day')
-};
+// let testItem: RecurringTask = {
+//     name: "test task",
+//     dayOfWeek: todayDay.get('day')
+// };
 
-console.log(testItem.dayOfWeek);
-console.log(isCurrentRecurringItem(testItem));
+// console.log(testItem.dayOfWeek);
+// console.log(isCurrentRecurringItem(testItem));
+
+try {
+    const ret = YAML.parse(testYamlTasks2, { uniqueKeys: false, prettyErrors: true, strict: false });
+    console.log(ret);
+} catch (error) {
+    if (error instanceof Error) {
+        console.log(error.message);
+    }
+}

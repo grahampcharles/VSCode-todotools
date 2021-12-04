@@ -12,7 +12,6 @@ dayjs.tz.guess();
 import { yamlDelimiter } from "./constants";
 import { dayNameToWeekday, daysSinceTheBeginningOfTime, todayDay } from "./dates";
 
-
 export function getYamlSection(editor: vscode.TextEditor): string[] {
     var sectionLines: string[] = [];
     var isInSection: Boolean = false;
@@ -79,15 +78,35 @@ export function isCurrentRecurringItem(task: RecurringTask): boolean {
 
 };
 
-// TODO: allow duplicate-named tasks
+/**
+ *parseYamlTasks
+ *Parses the "tasks" value of a YAML string into a recurring tasks array.
+ * @export
+ * @param {string} yamlSection The contents of the YAML task section.
+ * @return {*}  {RecurringTask[]}
+ */
+
+
 export function parseYamlTasks(yamlSection: string): RecurringTask[] {
 
-    const tree = YAML.parse(yamlSection);
+    let tree: any;
+
+    // try to parse the whole tree
+    try {
+        tree = YAML.parse(yamlSection, { uniqueKeys: false, prettyErrors: true, strict: false });
+    } catch (error) {
+        //if (error instanceof YAML.YAMLError) {
+        if (error instanceof Error) {
+            vscode.window.showInformationMessage(error.message);
+        }
+        return [];
+    }
 
     // get the tasks section
     if (!(tree && "tasks" in tree)) { return []; }
     const tasks = tree["tasks"];
 
+    // convert each task into a RecurringTask object
     return Object.keys(tasks).flatMap((pattern: string) => {
         const taskProps = yamlToTask(pattern);
         return tasks[pattern].map((key: string) => {

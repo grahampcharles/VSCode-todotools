@@ -1,5 +1,7 @@
 Today:
 	- whatever's already here
+	- mow lawn
+	- every Saturday test
 
 ---
 # todotools settings for this document
@@ -7,7 +9,7 @@ runOnOpen: True
 runDaily: True
 tasks: 
   daily: 
-    - mow lawn
+	- mow lawn
   2: 
     - eat groceries
     - every other day task two
@@ -25,5 +27,5 @@ tasks:
     - pay rent
   Saturday:
     - every Saturday test
-lastAutoRun: 2021-11-27T03:53:32.690Z
+lastAutoRun: 2021-12-04T23:06:20.360Z
 ---
