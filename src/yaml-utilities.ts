@@ -55,7 +55,8 @@ export type RecurringTask = {
     dateAnnual?: string,     // date without a year, in YYYY-MM-DD format
     dateOnce?: string,       // date with a year, in YYYY-MM-DD
     dayOfWeek?: number,      // day of week
-    dayOfMonth?: number      // day of month
+    dayOfMonth?: number,     // day of month
+    monthOfYear?: number
 };
 
 

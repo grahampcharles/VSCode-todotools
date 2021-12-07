@@ -44,6 +44,10 @@ tasks:
     - start XMas shopping
   monthly: 
     - pay rent
+  March:
+    - CoinStar
+  September:
+    - CoinStar
   Saturday:
     - every Saturday test
 `;

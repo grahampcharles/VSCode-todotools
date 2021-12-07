@@ -55,6 +55,8 @@ suite('Extension Test Suite', () => {
 		expect(yamlToTask('Jan. 2, 2001')).property('dateOnce').eql("2001-01-02", "dateOnce");
 		expect(yamlToTask('1/2')).property('dateAnnual').eql("01-02", "dateAnnual");
 		expect(yamlToTask('monthly')).property('dayOfMonth').eql(1, "dayOfMonth");
+		expect(yamlToTask('September')).property('monthOfYear').eql(8, "monthOfYear");
+		expect(yamlToTask('September')).property('dayOfMonth').eql(1, "dayOfMonth with monthOfYear");
 
 	});
 
@@ -82,6 +84,11 @@ suite('Extension Test Suite', () => {
 
 		const rent = tasks.filter(e => e.name === "pay rent")[0];
 		expect(rent).property("dayOfMonth").eql(1, "dayOfMonth");
+
+		const coinstars = tasks.filter(e => e.name === "CoinStar");
+		expect(coinstars).to.have.lengthOf(2, "coinstars");
+		expect(coinstars[1]).to.have.property("monthOfYear").eql(8, "coinstars: September");
+		expect(coinstars[1]).to.have.property("dayOfMonth").eql(1, "coinstars: September (day)");
 
 	});
 
