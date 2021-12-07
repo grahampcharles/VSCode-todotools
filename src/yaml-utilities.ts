@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
-import YAML = require('yaml');
-import dayjs = require('dayjs');
-import utc = require('dayjs/plugin/utc');
-import timezone = require('dayjs/plugin/timezone');
+import YAML = require("yaml");
+import dayjs = require("dayjs");
+import utc = require("dayjs/plugin/utc");
+import timezone = require("dayjs/plugin/timezone");
 
 // work in the local time zone
 dayjs.extend(utc);
@@ -27,9 +27,9 @@ export function getYamlSection(editor: vscode.TextEditor): string[] {
         }
     }
 
+    // TODO: clean the yaml a bit
     return sectionLines;
 }
-
 
 /* 
     yaml format:
@@ -59,7 +59,6 @@ export type RecurringTask = {
     monthOfYear?: number
 };
 
-
 /**
  * Returns a boolean indicating whether this task should be added today.
  *
@@ -68,16 +67,33 @@ export type RecurringTask = {
  * @return {*}  {boolean}
  */
 export function isCurrentRecurringItem(task: RecurringTask): boolean {
-
-    if (task.recurAfter !== undefined && (daysSinceTheBeginningOfTime % task.recurAfter === 0)) { return true; };
-    if (task.dateAnnual !== undefined && (dayjs(task.dateAnnual).format("MM-DD") === dayjs().format("MM-DD"))) { return true; }
-    if (task.dateOnce !== undefined && (dayjs(task.dateOnce).format("YYYY-MM-DD") === dayjs().format("YYYY-MM-DD"))) { return true; }
-    if (task.dayOfWeek !== undefined && (todayDay.day() === task.dayOfWeek)) { return true; }
-    if (task.dayOfMonth !== undefined && (todayDay.date() === task.dayOfMonth)) { return true; }
+    if (
+        task.recurAfter !== undefined &&
+        daysSinceTheBeginningOfTime % task.recurAfter === 0
+    ) {
+        return true;
+    }
+    if (
+        task.dateAnnual !== undefined &&
+        dayjs(task.dateAnnual).format("MM-DD") === dayjs().format("MM-DD")
+    ) {
+        return true;
+    }
+    if (
+        task.dateOnce !== undefined &&
+        dayjs(task.dateOnce).format("YYYY-MM-DD") === dayjs().format("YYYY-MM-DD")
+    ) {
+        return true;
+    }
+    if (task.dayOfWeek !== undefined && todayDay.day() === task.dayOfWeek) {
+        return true;
+    }
+    if (task.dayOfMonth !== undefined && todayDay.date() === task.dayOfMonth) {
+        return true;
+    }
 
     return false;
-
-};
+}
 
 
 /**
@@ -128,38 +144,42 @@ export function parseYamlTasks(yamlSection: string): RecurringTask[] {
 type TaskInputType = number | string;
 
 export function yamlToTask(input: TaskInputType): RecurringTask {
-
     // is this a number | numeric string?
-    if (!isNaN(+input)) { return { recurAfter: +input }; }
+    if (!isNaN(+input)) {
+        return { recurAfter: +input };
+    }
 
     if (typeof input === "string") {
-
         // certain constants
-        if (input.toLowerCase() === "daily") { return { recurAfter: 1 }; }
-        if (input.toLowerCase() === "monthly") { return { dayOfMonth: 1 }; }
+        if (input.toLowerCase() === "daily") {
+            return { recurAfter: 1 };
+        }
+        if (input.toLowerCase() === "monthly") {
+            return { dayOfMonth: 1 };
+        }
 
         // day of week
         const dayOfWeek = dayNameToWeekday(input);
-        if (dayOfWeek !== -1) { return { dayOfWeek: dayOfWeek }; };
+        if (dayOfWeek !== -1) {
+            return { dayOfWeek: dayOfWeek };
+        }
 
         // date without a year
         if (input.length <= 5) {
-            // concatenating 1600 to the beginning helps 
+            // concatenating 1600 to the beginning helps
             // us detect dates without years
             var theDate = dayjs("1600-".concat(input));
             if (theDate.isValid()) {
-                return { dateAnnual: theDate.format('MM-DD') };
+                return { dateAnnual: theDate.format("MM-DD") };
             }
         } else {
-
             // date with a year
             theDate = dayjs(input);
             if (theDate.isValid()) {
-                return { dateOnce: theDate.format('YYYY-MM-DD') };
+                return { dateOnce: theDate.format("YYYY-MM-DD") };
             }
         }
     }
 
-    return {};      // no parse possible
-
+    return {}; // no parse possible
 }
