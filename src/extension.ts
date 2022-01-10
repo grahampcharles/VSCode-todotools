@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import YAML = require('yaml');
 
-import { cleanYaml, getYamlSection, isCurrentRecurringItem, parseYamlTasks } from "./yaml-utilities";
+import { cleanYaml, getYamlSection, isCurrentRecurringItem, parseYamlTasks, yamlValue } from "./yaml-utilities";
 import { autoRunInterval, yamlLastRunProperty, yamlRunDaily } from "./constants";
 import { Settings } from "./Settings";
 import dayjs = require("dayjs");
@@ -18,16 +18,16 @@ let consoleChannel = vscode.window.createOutputChannel("ToDoTools");
  * @param {vscode.ExtensionContext} context
  */
 export function activate(context: vscode.ExtensionContext) {
-    // run on activation, if the "runOnOpen" parameter is set
+
+    // get reference to the active text editor
     const textEditor = vscode.window.activeTextEditor;
 
-    // get settings
+    // if there is one, then perform a copy
     if (textEditor) {
-        // perform automatic copy
         automaticPerformCopy(textEditor);
     }
 
-    // provide the implementation of the command with registerCommand
+    //  implement commands with registerCommand 
     let disposable = vscode.commands.registerCommand(
         "todotools.copyDailyToToday",
         () => {
@@ -39,7 +39,7 @@ export function activate(context: vscode.ExtensionContext) {
     );
     context.subscriptions.push(disposable);
 
-    // automatic re-run
+    // automatic re-run function 
     const autoRunFunction = function () {
         consoleChannel.appendLine("autorun called");
         let textEditor = vscode.window.activeTextEditor;
@@ -47,12 +47,15 @@ export function activate(context: vscode.ExtensionContext) {
             automaticPerformCopy(textEditor);
         }
     };
+
+    // get option for the automatic re-run interval
     if (textEditor && yamlValue(textEditor, yamlRunDaily)) {
         consoleChannel.appendLine("autorun interval set");
+        // set the auto-run function to run
         setInterval(autoRunFunction, autoRunInterval);
     }
 
-    // provide the implementation of the command with registerCommand
+    // DEBUG: implement a mock "pretend we just opened" command
     disposable = vscode.commands.registerCommand("todotools.runOnOpen", () => {
         let textEditor = vscode.window.activeTextEditor;
         if (textEditor) {
@@ -61,25 +64,26 @@ export function activate(context: vscode.ExtensionContext) {
     });
     context.subscriptions.push(disposable);
 
+    ////////////////
+    /// FUNCTIONS //
+    ////////////////
+
+    /**
+     *Automatically run the copy, unless we have already run today (using local time)
+     * @param {vscode.TextEditor} editor
+     */
     function automaticPerformCopy(editor: vscode.TextEditor) {
-        // we *should* run on open
-        // unless we have already run today (local time)
         settings.readFromTextEditor(editor);
         if (!settings.hasRunToday()) { performCopyAndSave(editor); }
     }
 
-    function yamlValue(
-        editor: vscode.TextEditor,
-        key: string
-    ): string | undefined {
-        const yamlParsed = YAML.parse(cleanYaml(getYamlSection(editor).join("\r\n")));
-
-        if (!(yamlParsed && key in yamlParsed)) { return undefined; }
-        return yamlParsed[key] as string;
-    }
-
+    /**
+     * Perform the copy of items to the Today section, 
+     * Save the results
+     *
+     * @param {vscode.TextEditor} editor
+     */
     function performCopyAndSave(editor: vscode.TextEditor) {
-        // do the copy and update the last run flag
         try {
             performCopy(editor)
                 .then(() =>
@@ -90,7 +94,6 @@ export function activate(context: vscode.ExtensionContext) {
                     )
                 )
                 .then(() =>
-                    // save after making the changes
                     editor.document.save()
                 )
                 .catch((reason: any) => {
@@ -111,8 +114,10 @@ export function activate(context: vscode.ExtensionContext) {
         // find the today line number
         if (!(getSectionLineNumber(textEditor, "Today") === undefined)) {
             // no point going on if there's no Today section
+            // TODO: *create* a Today section?
 
-            // get the "Today" section for comparison
+            // get the "Today" section to see if any of the recurring tasks 
+            // 
             const today = getSectionOld(textEditor, "Today");
             const recurring = parseYamlTasks(getYamlSection(textEditor).join("\r\n"));
 
