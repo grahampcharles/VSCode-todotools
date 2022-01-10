@@ -12,6 +12,16 @@ dayjs.tz.guess();
 import { yamlDelimiter } from "./constants";
 import { dayNameToWeekday, daysSinceTheBeginningOfTime, monthNameToNumber, todayDay } from "./dates";
 
+export function yamlValue(
+    editor: vscode.TextEditor,
+    key: string
+): string | undefined {
+    const yamlParsed = YAML.parse(cleanYaml(getYamlSection(editor).join("\r\n")));
+
+    if (!(yamlParsed && key in yamlParsed)) { return undefined; }
+    return yamlParsed[key] as string;
+}
+
 export function getYamlSection(editor: vscode.TextEditor): string[] {
     var sectionLines: string[] = [];
     var isInSection: Boolean = false;
@@ -189,3 +199,4 @@ export function yamlToTask(input: TaskInputType): RecurringTask {
 
     return {}; // no parse possible
 }
+

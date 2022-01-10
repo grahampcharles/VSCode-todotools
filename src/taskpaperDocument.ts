@@ -6,9 +6,17 @@
 
 */
 
-export interface TaskEntry {
-    name: string;
 
+
+/**
+ *Filters task document to return an array of tasks that have a @due tag
+ *
+ * @export
+ * @param {*} taskdocument
+ */
+export function getDueTasks(taskdocument: any): any[] {
+
+    return [];
 }
 
 /**
@@ -16,8 +24,8 @@ export interface TaskEntry {
  *
  * @export
  * @param {*} document Document returned by the taskpaper parser.
- * @return {*}  {string[]}
+ * @return {*} document with  
  */
-export function parseTaskDocument(document: any): string[] {
+export function parseTaskDocument(taskdocument: any): any[] {
     return [];
 }

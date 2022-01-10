@@ -11,6 +11,7 @@ import dayjs = require('dayjs');
 import taskparse = require('taskpaper');
 import { parseTaskDocument } from '../../taskpaperDocument';
 import { stringToLines } from '../../strings';
+import { parseTagValue } from '../../ParsedTask';
 
 suite('Extension Test Suite', () => {
 	vscode.window.showInformationMessage('Start all tests.');
@@ -118,6 +119,16 @@ suite('Extension Test Suite', () => {
 
 		const item = taskparse('- test item @done(2022-01-09) @testing');
 		expect(item.children[0]).property("tags").to.have.lengthOf(2);
+
+	});
+
+	test('task parsing', () => {
+
+		expect(parseTagValue('test')).to.have.property("tag").eql('test', "simple task, no value");
+		const complex = parseTagValue('test(testvalue)');
+		expect(complex).to.have.property("tag").eql('test', "complex task: tag");
+		expect(complex).to.have.property("value").eql('testvalue', "complex task: value");
+
 
 	});
 

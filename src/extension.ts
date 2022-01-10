@@ -108,6 +108,12 @@ export function activate(context: vscode.ExtensionContext) {
         }
     }
 
+    /**
+     *Perform the copy of any due recurring tasks into the Today section
+     *
+     * @param {vscode.TextEditor} textEditor
+     * @return {*}  {Promise<boolean>}
+     */
     async function performCopy(
         textEditor: vscode.TextEditor
     ): Promise<boolean> {
@@ -117,9 +123,9 @@ export function activate(context: vscode.ExtensionContext) {
             // TODO: *create* a Today section?
 
             // get the "Today" section to see if any of the recurring tasks 
-            // 
             const today = getSectionOld(textEditor, "Today");
             const recurring = parseYamlTasks(getYamlSection(textEditor).join("\r\n"));
+            // LEFT OFF HERE const due = getDueTasks(textEditor);
 
             const linesToAdd = recurring
                 .filter((item) => isCurrentRecurringItem(item))
