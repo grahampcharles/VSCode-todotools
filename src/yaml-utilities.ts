@@ -10,7 +10,7 @@ dayjs.extend(timezone);
 dayjs.tz.guess();
 
 import { yamlDelimiter } from "./constants";
-import { dayNameToWeekday, daysSinceTheBeginningOfTime, todayDay } from "./dates";
+import { dayNameToWeekday, daysSinceTheBeginningOfTime, monthNameToNumber, todayDay } from "./dates";
 
 export function getYamlSection(editor: vscode.TextEditor): string[] {
     var sectionLines: string[] = [];
@@ -162,6 +162,12 @@ export function yamlToTask(input: TaskInputType): RecurringTask {
         const dayOfWeek = dayNameToWeekday(input);
         if (dayOfWeek !== -1) {
             return { dayOfWeek: dayOfWeek };
+        }
+
+        // month of year
+        const monthOfYear = monthNameToNumber(input);
+        if (monthOfYear !== -1) {
+            return { monthOfYear: monthOfYear, dayOfMonth: 1 };
         }
 
         // date without a year

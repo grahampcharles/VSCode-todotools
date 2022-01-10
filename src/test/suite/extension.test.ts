@@ -1,13 +1,14 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
 import * as chai from 'chai';
-import { dayNames, dayNameToWeekday, daysPassed, todayDay, todayName } from '../../dates';
+import { dayNames, dayNameToWeekday, daysPassed, monthNameToNumber, todayDay, todayName } from '../../dates';
 import { isCurrentRecurringItem, parseYamlTasks, RecurringTask, yamlToTask } from '../../yaml-utilities';
 import { expect } from 'chai';
 import { testYaml, testYamlTasks, testYamlToday } from './testdata';
 import YAML = require('yaml');
 import { Settings } from '../../Settings';
 import dayjs = require('dayjs');
+import taskparse = require('taskpaper');
 
 suite('Extension Test Suite', () => {
 	vscode.window.showInformationMessage('Start all tests.');
@@ -23,6 +24,9 @@ suite('Extension Test Suite', () => {
 
 		// today's day name
 		assert.strictEqual(todayName, dayNames[todayDay.day()]);
+
+		expect(monthNameToNumber("September")).to.equal(8, "month name to number");
+		expect(dayNameToWeekday("Monday")).to.equal(1, "day name to weekday");
 
 	});
 
@@ -48,6 +52,8 @@ suite('Extension Test Suite', () => {
 	});
 
 	test('convert yaml to task', () => {
+
+		console.log(yamlToTask('September'));
 
 		expect(yamlToTask('2')).property('recurAfter').eql(2, "recurAfter");
 		expect(yamlToTask('Monday')).property('dayOfWeek').eql(1, "dayOfWeek");
@@ -89,6 +95,16 @@ suite('Extension Test Suite', () => {
 		expect(coinstars).to.have.lengthOf(2, "coinstars");
 		expect(coinstars[1]).to.have.property("monthOfYear").eql(8, "coinstars: September");
 		expect(coinstars[1]).to.have.property("dayOfMonth").eql(1, "coinstars: September (day)");
+
+	});
+
+	test('taskpaper parsing', () => {
+		let testItem: string = 'Test Project:\t- test item';
+		let parsed = taskparse(testItem);
+
+		console.log(parsed);
+		expect(parsed).property("type").eql("document");
+
 
 	});
 
