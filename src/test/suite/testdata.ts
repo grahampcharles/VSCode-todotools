@@ -1,5 +1,14 @@
 import dayjs = require("dayjs");
 
+export const testDocument = `
+Today:
+	- item 1
+
+Future:
+  - item 2 @due(2022-01-09)
+
+`;
+
 export const testYamlTasks = `# todotools settings for this document
 runOnOpen: True
 runDaily: True

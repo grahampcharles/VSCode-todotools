@@ -5,6 +5,7 @@ import { cleanYaml, getYamlSection, isCurrentRecurringItem, parseYamlTasks } fro
 import { autoRunInterval, yamlDelimiter, yamlLastRunProperty, yamlRunDaily, yamlRunOnOpenProperty } from "./constants";
 import { Settings } from "./Settings";
 import dayjs = require("dayjs");
+import { getSectionOld, isSectionHead } from "./taskpaper-utils";
 
 type SectionBounds = {
     first: number;
@@ -112,7 +113,7 @@ export function activate(context: vscode.ExtensionContext) {
             // no point going on if there's no Today section
 
             // get the "Today" section for comparison
-            const today = getSection(textEditor, "Today");
+            const today = getSectionOld(textEditor, "Today");
             const recurring = parseYamlTasks(getYamlSection(textEditor).join("\r\n"));
 
             const linesToAdd = recurring
@@ -146,7 +147,6 @@ export function activate(context: vscode.ExtensionContext) {
         return new Promise<boolean>(() => true);
     }
 }
-
 
 function setYamlProperty(
     editor: vscode.TextEditor,
@@ -194,30 +194,6 @@ function setYamlProperty(
     editor.edit((selectedText) => {
         selectedText.insert(new vscode.Position(yamlInsertLine, 0), newline);
     });
-}
-
-function getSection(editor: vscode.TextEditor, fromSection: string): string[] {
-    var lines: string[] = [];
-    var isInSection: Boolean = false;
-
-    console.info(`section: ${fromSection}`);
-
-    for (let i = 0; i < editor.document.lineCount; i++) {
-        if (isSectionHead(editor.document.lineAt(i).text) === fromSection) {
-            isInSection = true;
-        } else if (editor.document.lineAt(i).text === yamlDelimiter) {
-            isInSection = false;
-        } else if (isSectionHead(editor.document.lineAt(i).text)) {
-            isInSection = false;
-        } else if (/\S/.test(editor.document.lineAt(i).text)) {
-            // something other than whitespace?
-            if (isInSection) {
-                lines.push(editor.document.lineAt(i).text);
-            }
-        }
-    }
-
-    return lines;
 }
 
 function clearSection(
@@ -310,15 +286,6 @@ function getYamlSectionLastLineNumber(
     return -1;
 }
 
-function isSectionHead(line: string) {
-    const trimmed: string = line.trim();
-
-    if (trimmed.charAt(trimmed.length - 1) === ":") {
-        return trimmed.substring(0, trimmed.length - 1);
-    }
-
-    return false;
-}
 
 // this method is called when your extension is deactivated
 export function deactivate() { }
