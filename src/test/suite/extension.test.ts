@@ -4,11 +4,13 @@ import * as chai from 'chai';
 import { dayNames, dayNameToWeekday, daysPassed, monthNameToNumber, todayDay, todayName } from '../../dates';
 import { isCurrentRecurringItem, parseYamlTasks, RecurringTask, yamlToTask } from '../../yaml-utilities';
 import { expect } from 'chai';
-import { testYaml, testYamlTasks, testYamlToday } from './testdata';
+import { testYaml, testYamlTasks, testYamlTasks2, testYamlToday } from './testdata';
 import YAML = require('yaml');
 import { Settings } from '../../Settings';
 import dayjs = require('dayjs');
 import taskparse = require('taskpaper');
+import { parseTaskDocument } from '../../taskpaperDocument';
+import { stringToLines } from '../../strings';
 
 suite('Extension Test Suite', () => {
 	vscode.window.showInformationMessage('Start all tests.');
@@ -53,8 +55,6 @@ suite('Extension Test Suite', () => {
 
 	test('convert yaml to task', () => {
 
-		console.log(yamlToTask('September'));
-
 		expect(yamlToTask('2')).property('recurAfter').eql(2, "recurAfter");
 		expect(yamlToTask('Monday')).property('dayOfWeek').eql(1, "dayOfWeek");
 		expect(yamlToTask('Mondays')).property('dayOfWeek').eql(1, "dayOfWeek-pluralized");
@@ -91,20 +91,33 @@ suite('Extension Test Suite', () => {
 		const rent = tasks.filter(e => e.name === "pay rent")[0];
 		expect(rent).property("dayOfMonth").eql(1, "dayOfMonth");
 
-		const coinstars = tasks.filter(e => e.name === "CoinStar");
+		const tasks2 = parseYamlTasks(testYamlTasks2);
+		const coinstars = tasks2.filter(e => e.name === "CoinStar");
 		expect(coinstars).to.have.lengthOf(2, "coinstars");
 		expect(coinstars[1]).to.have.property("monthOfYear").eql(8, "coinstars: September");
 		expect(coinstars[1]).to.have.property("dayOfMonth").eql(1, "coinstars: September (day)");
 
 	});
 
+	test('document creation', () => {
+
+	});
+
+	test('string utilities', () => {
+		expect(stringToLines(`test\ntest2`)).to.have.lengthOf(2, 'stringToLines, \\n');
+		expect(stringToLines(`test\rtest2`)).to.have.lengthOf(2, 'stringToLines, \\r');
+		expect(stringToLines(`test\r\ntest2`)).to.have.lengthOf(2, 'stringToLines, \\r\\n');
+	});
+
 	test('taskpaper parsing', () => {
-		let testItem: string = 'Test Project:\t- test item';
-		let parsed = taskparse(testItem);
+		let testItem: string = 'Test Project:\n\t- test item @done(2022-01-09) @testing';
+		let document = taskparse(testItem);
+		let parsed = parseTaskDocument(document);
 
-		console.log(parsed);
-		expect(parsed).property("type").eql("document");
+		expect(document).property("type").eql("document");
 
+		const item = taskparse('- test item @done(2022-01-09) @testing');
+		expect(item.children[0]).property("tags").to.have.lengthOf(2);
 
 	});
 
