@@ -17,6 +17,7 @@ import {
 } from "../../yaml-utilities";
 import { expect } from "chai";
 import {
+    testDocument,
     testYaml,
     testYamlTasks,
     testYamlTasks2,
@@ -26,14 +27,9 @@ import YAML = require("yaml");
 import { Settings } from "../../Settings";
 import dayjs = require("dayjs");
 import taskparse = require("taskpaper");
-import { getDueTasks, parseTaskDocument } from "../../taskpaperDocument";
 import { stringToLines } from "../../strings";
-import {
-    ParsedTask,
-    parseTagValue,
-    parseTagValues,
-    TagWithValue,
-} from "../../ParsedTask";
+import { ParsedTask, parseTagValue, parseTagValues } from "../../ParsedTask";
+import { TagWithValue } from "../../TagWithValue";
 
 suite("Extension Test Suite", () => {
     vscode.window.showInformationMessage("Start all tests.");
@@ -136,8 +132,6 @@ suite("Extension Test Suite", () => {
             .eql(1, "coinstars: September (day)");
     });
 
-    test("document creation", () => {});
-
     test("string utilities", () => {
         expect(stringToLines(`test\ntest2`)).to.have.lengthOf(
             2,
@@ -153,15 +147,15 @@ suite("Extension Test Suite", () => {
         );
     });
 
-    test("getDueTasks", () => {
-        let testItem: string =
-            "Test Project:\n\t- test item @due(2022-01-09) @testing\n\t- not due yet @due(3000-01-10)";
-        let parsed = getDueTasks(testItem);
-        expect(parsed).to.have.lengthOf(1, "due tasks parsed");
-        expect(parsed[0])
-            .to.have.property("value")
-            .eql("test item", "due task name");
-    });
+    // test("getDueTasks", () => {
+    //     let testItem: string =
+    //         "Test Project:\n\t- test item @due(2022-01-09) @testing\n\t- not due yet @due(3000-01-10)";
+    //     let parsed = getDueTasks(testItem);
+    //     expect(parsed).to.have.lengthOf(1, "due tasks parsed");
+    //     expect(parsed[0])
+    //         .to.have.property("value")
+    //         .eql("test item", "due task name");
+    // });
 
     test("ParsedTask", () => {
         const testTask = new ParsedTask({
@@ -171,6 +165,35 @@ suite("Extension Test Suite", () => {
 
         expect(testTask).to.have.property("value").eql("test item");
         expect(testTask).to.have.property("tags").to.have.lengthOf(2);
+    });
+
+    test("parseTagDocument", () => {
+        const doc = testDocument;
+        const parsed = taskparse(doc);
+
+        expect(parsed).to.have.property("children");
+        expect(parsed.children).to.have.lengthOf(2, "children length");
+        const child0 = (parsed.children ?? [""])[0];
+        expect(child0 ?? {})
+            .to.have.property("type")
+            .eql("project");
+        expect(child0 ?? {})
+            .to.have.property("value")
+            .eql("Today");
+    });
+
+    test("parseTagItem", () => {
+        const parsed = taskparse("	- item 1");
+
+        expect(parsed).to.have.property("children");
+        expect(parsed.children).to.have.lengthOf(1, "children length");
+        const child0 = (parsed.children ?? [""])[0];
+        expect(child0 ?? {})
+            .to.have.property("type")
+            .eql("task");
+        expect(child0 ?? {})
+            .to.have.property("value")
+            .eql("item 1");
     });
 
     test("parseTagValue", () => {

@@ -1,13 +1,7 @@
-export type ParsedTaskInput = {
-    value: string;
-    tags: string[];
-};
+import { TagWithValue } from "./TagWithValue";
+import { ParsedTaskInput } from "./types";
 
-export interface TagWithValue {
-    tag: string;
-    value: string | undefined;
-}
-
+// TODO: deprecate
 export class ParsedTask {
     private _value: string = "";
     public get value(): string {
@@ -26,6 +20,10 @@ export class ParsedTask {
     }
 
     constructor(parsedtask: ParsedTaskInput) {
+        if (typeof ParsedTask === "string") {
+            return;
+        }
+
         this.value = parsedtask.value;
         this.tags = parsedtask.tags;
     }

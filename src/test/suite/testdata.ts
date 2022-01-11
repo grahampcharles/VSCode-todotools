@@ -1,7 +1,6 @@
 import dayjs = require("dayjs");
 
-export const testDocument = `
-Today:
+export const testDocument = `Today:
 	- item 1
 
 Future:
@@ -62,16 +61,16 @@ tasks:
 `;
 
 export const testYaml = [
-  "# todotools settings for this document",
-  "runOnOpen: True",
-  "runDaily: True",
-  "lastAutoRun: 2021-11-11T04:22:18.137Z"
+    "# todotools settings for this document",
+    "runOnOpen: True",
+    "runDaily: True",
+    "lastAutoRun: 2021-11-11T04:22:18.137Z",
 ].join("\r\n");
 
 const todayString = dayjs().format();
 export const testYamlToday = [
-  "# todotools settings for this document",
-  "runOnOpen: True",
-  "runDaily: True",
-  `lastAutoRun: ${todayString}`
+    "# todotools settings for this document",
+    "runOnOpen: True",
+    "runDaily: True",
+    `lastAutoRun: ${todayString}`,
 ].join("\r\n");
