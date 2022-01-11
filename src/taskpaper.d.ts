@@ -10,6 +10,7 @@ declare module "taskpaper" {
     type TaskPaperIndex = {
         line: number;
         column: number;
+        offset: number;
     };
 
     function parse(inputString: string): TaskPaperNode;
