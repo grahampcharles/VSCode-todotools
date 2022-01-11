@@ -1,5 +1,4 @@
 export type ParsedTaskInput = {
-    type: string;
     value: string;
     tags: string[];
 };
