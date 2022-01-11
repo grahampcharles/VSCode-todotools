@@ -29,6 +29,25 @@ export class ParsedTask {
         this.value = parsedtask.value;
         this.tags = parsedtask.tags;
     }
+
+    public removeTag(tagName: string) {
+        if (this._tags !== undefined) {
+            this._tags = this._tags.filter((tag) => {
+                return tag.value !== tagName;
+            });
+            if (this._tags.length === 0) {
+                this._tags = undefined;
+            }
+        }
+    }
+
+    public setTag(tagName: string, tagValue: string | undefined) {
+        this.removeTag(tagName);
+        if (this._tags === undefined) {
+            this._tags = new Array<TagWithValue>();
+        }
+        this._tags?.push({ tag: tagName, value: tagValue } as TagWithValue);
+    }
 }
 
 export function parseTagValues(
