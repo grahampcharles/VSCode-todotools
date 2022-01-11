@@ -5,7 +5,7 @@ declare module "taskpaper" {
         children?: TaskPaperNode[];
         tags?: string[];
         depth: number;
-        index?: TaskPaperIndex;
+        index: TaskPaperIndex;
     };
     type TaskPaperIndex = {
         line: number;

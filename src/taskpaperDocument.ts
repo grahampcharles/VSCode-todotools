@@ -14,6 +14,8 @@ import utc = require("dayjs/plugin/utc");
 import timezone = require("dayjs/plugin/timezone");
 import isSameOrBefore = require("dayjs/plugin/isSameOrBefore");
 import { TaskPaperNodeExt } from "./TaskPaperNodeExt";
+import { Task } from "vscode";
+import { stripYamlSection } from "./yaml-utilities";
 
 // work in the local time zone
 dayjs.extend(utc);
@@ -30,31 +32,52 @@ dayjs.extend(isSameOrBefore);
  * @param {*} document Document returned by the taskpaper parser.
  * @return {*} all the tasks in the document.
  */
-export function parseTaskDocument(taskdocument: string): TaskPaperNodeExt {
-    return new TaskPaperNodeExt(taskparser(taskdocument));
+export function parseTaskDocument(
+    taskdocument: string
+): TaskPaperNodeExt | string {
+    try {
+        // TODO: switch from YAML to Settings project; OR
+        // update parser to ignore YAML
+        const yamlstripped = stripYamlSection(taskdocument);
+        const doc = taskparser(yamlstripped);
+        return new TaskPaperNodeExt(doc);
+    } catch (error: any) {
+        return error.toString();
+    }
 }
 
 /**
- *Filters task document to return an array of tasks that have a @due tag
- *on or before today in the current time zone.
+ *Returns all tasks that are @due today or earlier, not @done, and not in "Today"
+ *
  * @export
- * @param {*} taskpaperText
+ * @param {TaskPaperNodeExt} node
+ * @return {*}  {TaskPaperNodeExt[]}
  */
-// export function getDueTasks(taskpaperText: string): ParsedTask[] {
-//     const allTasks = parseTaskDocument(taskpaperText);
+export function getDueTasks(node: TaskPaperNodeExt): TaskPaperNodeExt[] {
+    const results = new Array<TaskPaperNodeExt>();
 
-//     // return allTasks.filter((task) => {
-//     //     const due = task.tags?.filter((tag) => tag.tag === "due");
-//     //     if (due !== undefined && due.length > 0) {
-//     //         const dateString = due[0].value;
-//     //         if (dayjs(dateString).isSameOrBefore(dayjs(), "day")) {
-//     //             // this task is due
-//     //             return true;
-//     //         }
-//     //     }
-//     //     return false;
-//     // });
-// }
+    // does this node have children? if so, act on the children
+    // but skip the Today project
+    if (!(node.type === "project" && node.value?.toLowerCase() === "today")) {
+        if (node.children !== undefined) {
+            node.children.forEach((childnode) =>
+                results.push(...getDueTasks(childnode))
+            );
+        }
+    }
+
+    // push any tasks that are due on or before today
+    if (
+        node.type === "task" &&
+        node.hasTag("due") &&
+        dayjs(node.tagValue("due")).isSameOrBefore(dayjs(), "day")
+    ) {
+        // return the task itself
+        results.push(node);
+    }
+
+    return results;
+}
 
 // function parseTaskNode(node: TaskPaperNode): ParsedTask[] {
 //     const results = new Array<ParsedTask>();

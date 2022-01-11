@@ -13,4 +13,11 @@ export class TagWithValue {
                 (this.value = tag.substring(paren + 1, tag.length - 1));
         }
     }
+
+    toString(): string {
+        if (this.value === undefined) {
+            return `@${this.tag}`;
+        }
+        return `@${this.tag}(${this.value})`;
+    }
 }

@@ -1,9 +1,13 @@
 Today:
 	- whatever's already here
+	- shop
 	- eat groceries
 	- every other day task two
 	- mow lawn
 	- every Saturday test
+
+Future:
+	- this should be due @due(2022-01-11)
 
 ---
 # todotools settings for this document
@@ -29,5 +33,5 @@ tasks:
     - pay rent
   Saturday:
     - every Saturday test
-lastAutoRun: 2022-01-10T03:09:56.065Z
+lastAutoRun: 2022-01-11T21:21:39.834Z
 ---

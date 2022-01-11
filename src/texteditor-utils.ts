@@ -1,12 +1,11 @@
 import * as vscode from "vscode";
-import { autoRunInterval, yamlDelimiter, yamlLastRunProperty, yamlRunDaily, yamlRunOnOpenProperty } from "./constants";
+import { yamlDelimiter } from "./constants";
 import { isSectionHead } from "./taskpaper-utils";
 
 type SectionBounds = {
     first: number;
     last: number;
 };
-
 
 export function setYamlProperty(
     editor: vscode.TextEditor,
@@ -63,7 +62,6 @@ export function clearSection(
     const lineRange: SectionBounds = getSectionLineNumber(editor, fromSection);
 
     if (lineRange.last !== -1) {
-        console.info("making clear");
         var range = new vscode.Range(lineRange.first, 0, lineRange.last, 0);
         const edit = new vscode.WorkspaceEdit();
         edit.delete(editor.document.uri, range);
@@ -72,6 +70,17 @@ export function clearSection(
     }
 
     return Promise.resolve(true);
+}
+
+export function deleteLine(
+    editor: vscode.TextEditor,
+    line: number
+): Thenable<boolean> {
+    const range = new vscode.Range(line, 0, line + 1, 0);
+    const edit = new vscode.WorkspaceEdit();
+    edit.delete(editor.document.uri, range);
+    const applyThenable = vscode.workspace.applyEdit(edit);
+    return applyThenable;
 }
 
 export function getSectionLineNumber(

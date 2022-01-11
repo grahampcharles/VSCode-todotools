@@ -1,12 +1,29 @@
 import * as vscode from "vscode";
-import YAML = require('yaml');
+import YAML = require("yaml");
 
-import { cleanYaml, getYamlSection, isCurrentRecurringItem, parseYamlTasks, yamlValue } from "./yaml-utilities";
-import { autoRunInterval, yamlLastRunProperty, yamlRunDaily } from "./constants";
+import {
+    cleanYaml,
+    getYamlSection,
+    isCurrentRecurringItem,
+    parseYamlTasks,
+    yamlValue,
+} from "./yaml-utilities";
+import {
+    autoRunInterval,
+    yamlLastRunProperty,
+    yamlRunDaily,
+} from "./constants";
 import { Settings } from "./Settings";
 import dayjs = require("dayjs");
-import { getSectionOld } from "./taskpaper-utils";
-import { setYamlProperty, getSectionLineNumber } from "./texteditor-utils";
+import { getSection } from "./taskpaper-utils";
+import {
+    setYamlProperty,
+    getSectionLineNumber,
+    deleteLine,
+} from "./texteditor-utils";
+import { stringToLines } from "./strings";
+import { ParsedTask } from "./ParsedTask";
+import { getDueTasks, parseTaskDocument } from "./taskpaperDocument";
 
 let settings: Settings = new Settings();
 let consoleChannel = vscode.window.createOutputChannel("ToDoTools");
@@ -18,7 +35,6 @@ let consoleChannel = vscode.window.createOutputChannel("ToDoTools");
  * @param {vscode.ExtensionContext} context
  */
 export function activate(context: vscode.ExtensionContext) {
-
     // get reference to the active text editor
     const textEditor = vscode.window.activeTextEditor;
 
@@ -27,7 +43,7 @@ export function activate(context: vscode.ExtensionContext) {
         automaticPerformCopy(textEditor);
     }
 
-    //  implement commands with registerCommand 
+    //  implement commands with registerCommand
     let disposable = vscode.commands.registerCommand(
         "todotools.copyDailyToToday",
         () => {
@@ -39,7 +55,7 @@ export function activate(context: vscode.ExtensionContext) {
     );
     context.subscriptions.push(disposable);
 
-    // automatic re-run function 
+    // automatic re-run function
     const autoRunFunction = function () {
         consoleChannel.appendLine("autorun called");
         let textEditor = vscode.window.activeTextEditor;
@@ -74,11 +90,13 @@ export function activate(context: vscode.ExtensionContext) {
      */
     function automaticPerformCopy(editor: vscode.TextEditor) {
         settings.readFromTextEditor(editor);
-        if (!settings.hasRunToday()) { performCopyAndSave(editor); }
+        if (!settings.hasRunToday()) {
+            performCopyAndSave(editor);
+        }
     }
 
     /**
-     * Perform the copy of items to the Today section, 
+     * Perform the copy of items to the Today section,
      * Save the results
      *
      * @param {vscode.TextEditor} editor
@@ -93,9 +111,7 @@ export function activate(context: vscode.ExtensionContext) {
                         dayjs().toISOString()
                     )
                 )
-                .then(() =>
-                    editor.document.save()
-                )
+                .then(() => editor.document.save())
                 .catch((reason: any) => {
                     if (reason instanceof Error) {
                         console.log(reason.message);
@@ -122,10 +138,43 @@ export function activate(context: vscode.ExtensionContext) {
             // no point going on if there's no Today section
             // TODO: *create* a Today section?
 
-            // get the "Today" section to see if any of the recurring tasks 
-            const today = getSectionOld(textEditor, "Today");
-            const recurring = parseYamlTasks(getYamlSection(textEditor).join("\r\n"));
-            // LEFT OFF HERE const due = getDueTasks(textEditor);
+            // get the "Today" section to see if any of the recurring tasks
+            const text = textEditor.document.getText();
+            const today = getSection(stringToLines(text), "Today");
+            const recurring = parseYamlTasks(
+                getYamlSection(textEditor).join("\r\n")
+            );
+
+            // get any due items that are not done and are not already in the Today section
+            const items = parseTaskDocument(text);
+
+            // report error to user
+            if (typeof items === "string") {
+                await vscode.window.showInformationMessage(items);
+                return false;
+            }
+
+            const due = getDueTasks(items);
+
+            const adds = new Array<string>();
+            const deletes = new Array<number>();
+
+            due.forEach((item) => {
+                // clear extraneous tags
+                item.removeTag(["project", "lasted", "started", "done"]);
+                // set to depth 1 (only top-level Today is allowed)
+                item.depth = 1;
+                // add task
+                adds.push(item.toString());
+                // delete line
+                deletes.push(item.index.line);
+            });
+
+            // delete all the lines, starting from the highest-numbered
+            // TODO: chain these
+            for (const line of deletes.sort((a, b) => b - a)) {
+                await deleteLine(textEditor, line);
+            }
 
             const linesToAdd = recurring
                 .filter((item) => isCurrentRecurringItem(item))
@@ -134,8 +183,14 @@ export function activate(context: vscode.ExtensionContext) {
                 // remove anything that's already in the today
                 .filter((v) => !today.includes(v))
                 // unduplicate
-                .filter((v, i, a) => a.indexOf(v) === i)
-                ;
+                .filter((v, i, a) => a.indexOf(v) === i);
+
+            // add new-style dealies
+            linesToAdd.push(
+                ...adds.map((add) => {
+                    return add.toString();
+                })
+            );
 
             if (linesToAdd.length > 0) {
                 // add a trailing item to ensure a terminal linefeed
@@ -159,4 +214,4 @@ export function activate(context: vscode.ExtensionContext) {
     }
 }
 
-export function deactivate() { }
+export function deactivate() {}

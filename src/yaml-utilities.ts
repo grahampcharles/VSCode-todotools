@@ -10,16 +10,43 @@ dayjs.extend(timezone);
 dayjs.tz.guess();
 
 import { yamlDelimiter } from "./constants";
-import { dayNameToWeekday, daysSinceTheBeginningOfTime, monthNameToNumber, todayDay } from "./dates";
+import {
+    dayNameToWeekday,
+    daysSinceTheBeginningOfTime,
+    monthNameToNumber,
+    todayDay,
+} from "./dates";
+import { stringToLines } from "./strings";
 
 export function yamlValue(
     editor: vscode.TextEditor,
     key: string
 ): string | undefined {
-    const yamlParsed = YAML.parse(cleanYaml(getYamlSection(editor).join("\r\n")));
+    const yamlParsed = YAML.parse(
+        cleanYaml(getYamlSection(editor).join("\r\n"))
+    );
 
-    if (!(yamlParsed && key in yamlParsed)) { return undefined; }
+    if (!(yamlParsed && key in yamlParsed)) {
+        return undefined;
+    }
     return yamlParsed[key] as string;
+}
+
+export function stripYamlSection(document: string): string {
+    const lines = stringToLines(document);
+    var sectionLines: string[] = [];
+    var isInSection: Boolean = false;
+
+    for (let i = 0; i < lines.length; i++) {
+        if (lines[i] === yamlDelimiter) {
+            isInSection = !isInSection;
+        } else {
+            if (!isInSection) {
+                sectionLines.push(lines[i]);
+            }
+        }
+    }
+    return sectionLines.join(`\n`);
 }
 
 export function getYamlSection(editor: vscode.TextEditor): string[] {
@@ -60,13 +87,13 @@ export function getYamlSection(editor: vscode.TextEditor): string[] {
 */
 
 export type RecurringTask = {
-    name?: string,
-    recurAfter?: number,     // every n days (1 = every day, 2 = every other, etc.)
-    dateAnnual?: string,     // date without a year, in YYYY-MM-DD format
-    dateOnce?: string,       // date with a year, in YYYY-MM-DD
-    dayOfWeek?: number,      // day of week
-    dayOfMonth?: number,     // day of month
-    monthOfYear?: number
+    name?: string;
+    recurAfter?: number; // every n days (1 = every day, 2 = every other, etc.)
+    dateAnnual?: string; // date without a year, in YYYY-MM-DD format
+    dateOnce?: string; // date with a year, in YYYY-MM-DD
+    dayOfWeek?: number; // day of week
+    dayOfMonth?: number; // day of month
+    monthOfYear?: number;
 };
 
 /**
@@ -91,7 +118,8 @@ export function isCurrentRecurringItem(task: RecurringTask): boolean {
     }
     if (
         task.dateOnce !== undefined &&
-        dayjs(task.dateOnce).format("YYYY-MM-DD") === dayjs().format("YYYY-MM-DD")
+        dayjs(task.dateOnce).format("YYYY-MM-DD") ===
+            dayjs().format("YYYY-MM-DD")
     ) {
         return true;
     }
@@ -104,7 +132,6 @@ export function isCurrentRecurringItem(task: RecurringTask): boolean {
 
     return false;
 }
-
 
 /**
  *cleanYaml
@@ -124,12 +151,15 @@ export function cleanYaml(input: string): string {
  * @return {*}  {RecurringTask[]}
  */
 export function parseYamlTasks(yamlSection: string): RecurringTask[] {
-
     let tree: any;
 
     // try to parse the whole tree
     try {
-        tree = YAML.parse(cleanYaml(yamlSection), { uniqueKeys: false, prettyErrors: true, strict: false });
+        tree = YAML.parse(cleanYaml(yamlSection), {
+            uniqueKeys: false,
+            prettyErrors: true,
+            strict: false,
+        });
     } catch (error) {
         if (error instanceof Error) {
             vscode.window.showInformationMessage(error.message);
@@ -138,16 +168,17 @@ export function parseYamlTasks(yamlSection: string): RecurringTask[] {
     }
 
     // get the tasks section
-    if (!(tree && "tasks" in tree)) { return []; }
+    if (!(tree && "tasks" in tree)) {
+        return [];
+    }
     const tasks = tree["tasks"];
 
     // convert each task into a RecurringTask object
     return Object.keys(tasks).flatMap((pattern: string) => {
         const taskProps = yamlToTask(pattern);
         return tasks[pattern].map((key: string) => {
-            return ({ name: key, ...taskProps } as RecurringTask);
-        }
-        );
+            return { name: key, ...taskProps } as RecurringTask;
+        });
     });
 }
 
@@ -199,4 +230,3 @@ export function yamlToTask(input: TaskInputType): RecurringTask {
 
     return {}; // no parse possible
 }
-

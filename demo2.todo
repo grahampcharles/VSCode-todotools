@@ -1,0 +1,17 @@
+Today:
+	- whatever's already here
+	- eat groceries
+	- every other day task two
+	- mow lawn 
+	- every Saturday test
+
+Future:
+	- this should be due @due(2022-01-11)
+	- this should not be due @due(2022-01-13)
+	- this should be due too @due(2022-01-11)
+
+---
+# todotools settings for this document
+runOnOpen: True
+runDaily: True
+---
