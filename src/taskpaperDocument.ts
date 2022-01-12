@@ -16,6 +16,7 @@ import isSameOrBefore = require("dayjs/plugin/isSameOrBefore");
 import { TaskPaperNodeExt } from "./TaskPaperNodeExt";
 import { Task } from "vscode";
 import { stripYamlSection } from "./yaml-utilities";
+import { stripTrailingWhitespace } from "./strings";
 
 // work in the local time zone
 dayjs.extend(utc);
@@ -32,18 +33,14 @@ dayjs.extend(isSameOrBefore);
  * @param {*} document Document returned by the taskpaper parser.
  * @return {*} all the tasks in the document.
  */
-export function parseTaskDocument(
-    taskdocument: string
-): TaskPaperNodeExt | string {
-    try {
-        // TODO: switch from YAML to Settings project; OR
-        // update parser to ignore YAML
-        const yamlstripped = stripYamlSection(taskdocument);
-        const doc = taskparser(yamlstripped);
-        return new TaskPaperNodeExt(doc);
-    } catch (error: any) {
-        return error.toString();
-    }
+export function parseTaskDocument(taskdocument: string): TaskPaperNodeExt {
+    // TODO: switch from YAML to Settings project; OR
+    // update parser to ignore YAML
+    const yamlstripped = stripYamlSection(taskdocument);
+    // TODO: update parser to ignore trailing whitespace
+    const cleaned = stripTrailingWhitespace(yamlstripped);
+    const doc = taskparser(cleaned);
+    return new TaskPaperNodeExt(doc);
 }
 
 /**
@@ -73,6 +70,35 @@ export function getDueTasks(node: TaskPaperNodeExt): TaskPaperNodeExt[] {
         dayjs(node.tagValue("due")).isSameOrBefore(dayjs(), "day")
     ) {
         // return the task itself
+        results.push(node);
+    }
+
+    return results;
+}
+
+// Returns tasks that are done and have a recurrence flag
+export function getRecurringTasks(node: TaskPaperNodeExt): TaskPaperNodeExt[] {
+    const results = new Array<TaskPaperNodeExt>();
+
+    // does this node have children? if so, act on the children
+    if (node.children !== undefined) {
+        node.children.forEach((childnode) =>
+            results.push(...getRecurringTasks(childnode))
+        );
+    }
+
+    // push any tasks that are due on or before today
+    if (node.type === "task" && node.hasTag("done")) {
+        // get the updated node
+        const done = dayjs(node.tagValue("done"));
+
+        // what's the new due date?
+        if (node.hasTag("recur")) {
+            const days = parseInt(node.tagValue("recur") ?? "1", 0) || 1;
+            node.setTag("due", done.add(days, "day").format("YYYY-MM-DD"));
+        }
+        /// TODO: other flags, like "dayOfMonth(1), weekly(Tuesday)," etc.
+
         results.push(node);
     }
 

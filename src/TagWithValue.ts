@@ -2,8 +2,15 @@ export class TagWithValue {
     tag: string;
     value: string | undefined;
 
-    constructor(tag: string) {
+    constructor(tag: string, value?: string) {
         // TODO: improve this with a regex
+
+        if (value !== undefined) {
+            this.tag = tag;
+            this.value = value;
+            return;
+        }
+
         const paren = tag.indexOf("(");
 
         if (paren === -1) {

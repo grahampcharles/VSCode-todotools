@@ -20,10 +20,17 @@ import {
     setYamlProperty,
     getSectionLineNumber,
     deleteLine,
+    addLinesToSection,
+    replaceLine,
 } from "./texteditor-utils";
 import { stringToLines } from "./strings";
 import { ParsedTask } from "./ParsedTask";
-import { getDueTasks, parseTaskDocument } from "./taskpaperDocument";
+import {
+    getDueTasks,
+    getRecurringTasks,
+    parseTaskDocument,
+} from "./taskpaperDocument";
+import { TaskPaperNodeExt } from "./TaskPaperNodeExt";
 
 let settings: Settings = new Settings();
 let consoleChannel = vscode.window.createOutputChannel("ToDoTools");
@@ -138,32 +145,74 @@ export function activate(context: vscode.ExtensionContext) {
             // no point going on if there's no Today section
             // TODO: *create* a Today section?
 
-            // get the "Today" section to see if any of the recurring tasks
-            const text = textEditor.document.getText();
-            const today = getSection(stringToLines(text), "Today");
-            const recurring = parseYamlTasks(
-                getYamlSection(textEditor).join("\r\n")
-            );
+            // get the "future" section
+            var text = textEditor.document.getText();
+            const future = getSection(stringToLines(text), "Future");
+            var items: TaskPaperNodeExt;
 
-            // get any due items that are not done and are not already in the Today section
-            const items = parseTaskDocument(text);
-
-            // report error to user
-            if (typeof items === "string") {
-                await vscode.window.showInformationMessage(items);
+            // parse the taskpaper if possible
+            try {
+                items = parseTaskDocument(text);
+            } catch (error: any) {
+                // report error to user
+                await vscode.window.showInformationMessage(error.toString());
                 return false;
             }
 
-            const due = getDueTasks(items);
+            // 1. copy FUTURE tasks to Future
+            ////////////////////////////////////
+            var newFutures = new Array<string>();
+            const futureTasks = getRecurringTasks(items);
 
+            // add future tasks
+            for (const task of futureTasks) {
+                // update current line by removing recurrence flags
+                await replaceLine(
+                    textEditor,
+                    task.index.line,
+                    task.toString(["recur", "due"])
+                );
+
+                // create future task
+                newFutures.push(
+                    task.toString(["done", "project", "lasted", "started"])
+                );
+            }
+
+            // remove anything that's already in the future section,
+            // and unduplicate
+            newFutures = newFutures
+                .filter((v) => !future.includes(v))
+                .filter((v, i, a) => a.indexOf(v) === i);
+
+            // add futures
+            await addLinesToSection(textEditor, "Future", newFutures);
+
+            // 2. move DUE tasks to Today
+            ///////////////////////////////
+
+            // re-parse to account for changes
+            text = textEditor.document.getText();
+
+            // parse the taskpaper again if possible
+            try {
+                items = parseTaskDocument(text);
+            } catch (error: any) {
+                // report error to user
+                await vscode.window.showInformationMessage(error.toString());
+                return false;
+            }
+
+            // get due items
+            const due = getDueTasks(items);
             const adds = new Array<string>();
             const deletes = new Array<number>();
 
             due.forEach((item) => {
                 // clear extraneous tags
                 item.removeTag(["project", "lasted", "started", "done"]);
-                // set to depth 1 (only top-level Today is allowed)
-                item.depth = 1;
+                // set to depth 2 (only top-level Today is allowed)
+                item.depth = 2;
                 // add task
                 adds.push(item.toString());
                 // delete line
@@ -176,37 +225,13 @@ export function activate(context: vscode.ExtensionContext) {
                 await deleteLine(textEditor, line);
             }
 
-            const linesToAdd = recurring
-                .filter((item) => isCurrentRecurringItem(item))
-                // add leading tab
-                .map((item) => `\t- ${item.name}` ?? "")
-                // remove anything that's already in the today
-                .filter((v) => !today.includes(v))
-                // unduplicate
-                .filter((v, i, a) => a.indexOf(v) === i);
-
-            // add new-style dealies
-            linesToAdd.push(
-                ...adds.map((add) => {
-                    return add.toString();
-                })
-            );
-
-            if (linesToAdd.length > 0) {
-                // add a trailing item to ensure a terminal linefeed
-                linesToAdd.push("");
-            }
+            // add all the new lines
+            const linesToAdd = adds.map((add) => {
+                return add.toString();
+            });
 
             // insert the lines
-            const todayLine = getSectionLineNumber(textEditor, "Today").first;
-            const edit = new vscode.WorkspaceEdit();
-            edit.insert(
-                textEditor.document.uri,
-                new vscode.Position(todayLine + 1, 0),
-                linesToAdd.join("\r\n")
-            );
-            const applyThenable = vscode.workspace.applyEdit(edit);
-            return applyThenable;
+            await addLinesToSection(textEditor, "Today", linesToAdd);
         }
 
         // nothing to execute: return true

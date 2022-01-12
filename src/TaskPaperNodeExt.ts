@@ -27,12 +27,16 @@ export class TaskPaperNodeExt {
         });
     }
 
-    toString(): string {
+    toString(removetags?: string[]): string {
         const tags =
-            this.tagsParsed?.map((tag) => {
-                return tag.toString();
-            }) ?? "";
-        const prefix = `\t`.repeat(this.depth);
+            this.tagsParsed
+                ?.filter(
+                    (tag) =>
+                        !removetags?.some((removetag) => tag.tag === removetag)
+                )
+                .map((tag) => tag.toString())
+                .join(" ") || "";
+        const prefix = `\t`.repeat(this.depth - 1);
 
         return `${prefix}- ${this.value} ${tags}`.trimRight();
     }
@@ -43,6 +47,20 @@ export class TaskPaperNodeExt {
 
     hasTag(tagName: string): boolean {
         return this.tagsParsed?.some((tag) => tag.tag === tagName) ?? false;
+    }
+
+    setTag(tagName: string, tagValue: string): void {
+        if (this.tagsParsed === undefined) {
+            this.tagsParsed = [new TagWithValue(tagName, tagValue)];
+            return;
+        }
+        const index = this.tagsParsed.findIndex((tag) => tag.tag === tagName);
+        if (index === -1) {
+            // this doesn't push a TagWithValue
+            this.tagsParsed.push(new TagWithValue(tagName, tagValue));
+            return;
+        }
+        this.tagsParsed[index].value = tagValue;
     }
 
     removeTag(tagName: string | string[]): void {

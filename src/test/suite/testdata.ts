@@ -1,7 +1,8 @@
 import dayjs = require("dayjs");
 
 export const testDocument = `Today:
-	- item 1
+	- every Saturday test
+  - done copy to future @done(2022-01-11) @recur(2)
 
 Future:
   - item 2 @due(2022-01-09)

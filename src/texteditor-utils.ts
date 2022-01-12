@@ -154,3 +154,37 @@ export function getYamlSectionLastLineNumber(
 
     return -1;
 }
+
+export async function addLinesToSection(
+    textEditor: vscode.TextEditor,
+    section: string,
+    lines: string[]
+): Promise<boolean> {
+    if (lines.length === 0) {
+        return true;
+    }
+    const lineStart = getSectionLineNumber(textEditor, section).first;
+    const edit = new vscode.WorkspaceEdit();
+
+    lines.push(""); // add a newline after
+    edit.insert(
+        textEditor.document.uri,
+        new vscode.Position(lineStart, 0),
+        lines.join("\n")
+    );
+    return vscode.workspace.applyEdit(edit);
+}
+
+export async function replaceLine(
+    textEditor: vscode.TextEditor,
+    line: number,
+    text: string
+): Promise<boolean> {
+    const edit = new vscode.WorkspaceEdit();
+    edit.replace(
+        textEditor.document.uri,
+        new vscode.Range(line - 1, 0, line, 0),
+        `${text}\n`
+    );
+    return vscode.workspace.applyEdit(edit);
+}

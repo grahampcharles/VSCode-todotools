@@ -27,9 +27,10 @@ import YAML = require("yaml");
 import { Settings } from "../../Settings";
 import dayjs = require("dayjs");
 import taskparse = require("taskpaper");
-import { stringToLines } from "../../strings";
+import { stringToLines, stripTrailingWhitespace } from "../../strings";
 import { ParsedTask, parseTagValue, parseTagValues } from "../../ParsedTask";
 import { TagWithValue } from "../../TagWithValue";
+import { TaskPaperNode } from "../../types";
 
 suite("Extension Test Suite", () => {
     vscode.window.showInformationMessage("Start all tests.");
@@ -173,27 +174,22 @@ suite("Extension Test Suite", () => {
 
         expect(parsed).to.have.property("children");
         expect(parsed.children).to.have.lengthOf(2, "children length");
-        const child0 = (parsed.children ?? [""])[0];
+        const child0 = (parsed.children ?? [{} as TaskPaperNode])[0];
         expect(child0 ?? {})
             .to.have.property("type")
             .eql("project");
         expect(child0 ?? {})
             .to.have.property("value")
             .eql("Today");
+
+        const todayProject = child0.children || [{} as TaskPaperNode];
+        expect(todayProject).to.have.lengthOf(2, "today length");
     });
 
-    test("parseTagItem", () => {
-        const parsed = taskparse("	- item 1");
-
-        expect(parsed).to.have.property("children");
-        expect(parsed.children).to.have.lengthOf(1, "children length");
-        const child0 = (parsed.children ?? [""])[0];
-        expect(child0 ?? {})
-            .to.have.property("type")
-            .eql("task");
-        expect(child0 ?? {})
-            .to.have.property("value")
-            .eql("item 1");
+    test("stripTrailingWhitespace", () => {
+        const test = `line 1\nline 2\t\nline 3  \n\nline 4`;
+        const result = stripTrailingWhitespace(test);
+        expect(result).eq(`line 1\nline 2\nline 3\n\nline 4`);
     });
 
     test("parseTagValue", () => {

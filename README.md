@@ -13,8 +13,8 @@ Rather than using YAML, items will have various flags for creating their recurre
 
 ```
 Today:
-- item 1 @recurAfter(2)
-- item 2 @done(2020-01-03) @recurAfter(2)
+- item 1 recur(2)
+- item 2 @done(2020-01-03) @recur(2)
 
 Future:
 - item 3 @due(2020-01-04)
