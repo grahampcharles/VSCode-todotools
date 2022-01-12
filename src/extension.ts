@@ -160,7 +160,13 @@ export function activate(context: vscode.ExtensionContext) {
 
                 // create future task
                 newFutures.push(
-                    task.toString(["done", "project", "lasted", "started"])
+                    task.toString([
+                        "done",
+                        "project",
+                        "lasted",
+                        "started",
+                        "annual",
+                    ])
                 );
             }
 

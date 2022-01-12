@@ -42,7 +42,13 @@ export class TaskPaperNodeExt {
     }
 
     tagValue(tagName: string): string | undefined {
-        return this.tagsParsed?.filter((tag) => tag.tag === tagName)[0].value;
+        if (this.hasTag(tagName)) {
+            return (
+                this.tagsParsed?.filter((tag) => tag.tag === tagName)[0]
+                    .value || undefined
+            );
+        }
+        return undefined;
     }
 
     hasTag(tagName: string): boolean {

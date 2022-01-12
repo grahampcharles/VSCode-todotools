@@ -1,8 +1,6 @@
 Today:
 	- whatever's already here
 	- eat groceries
-	- every other day task two
-	- mow lawn 
 	- recur on Tuesdays @recur(Tuesdays) @done(2022-01-10) @good
 	- happen on one Sunday @recur(Sunday) @done(2022-01-10) @good	
 	- done copy to future @recur(2) @done(2022-01-11) @good
@@ -11,3 +9,4 @@ Future:
 	- this should be due @due(2022-01-11)  @good	
 	- this should not be due @due(2022-01-13) @good	
 	- this should be due too @due(2022-01-11) @good	
+	- this should be due and remain due for next year @annual(1/11)

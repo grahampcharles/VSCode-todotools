@@ -80,7 +80,7 @@ export function getDueTasks(node: TaskPaperNodeExt): TaskPaperNodeExt[] {
     return results;
 }
 
-// Returns tasks that are done and have a recurrence flag
+// Returns tasks that are have a recurrence flag
 export function getRecurringTasks(node: TaskPaperNodeExt): TaskPaperNodeExt[] {
     const results = new Array<TaskPaperNodeExt>();
 
@@ -92,14 +92,20 @@ export function getRecurringTasks(node: TaskPaperNodeExt): TaskPaperNodeExt[] {
     }
 
     // push any tasks that are due on or before today
-    if (node.type === "task" && node.hasTag("done")) {
+    // TODO: doesn't always have to say "done," right?
+    // remove the done || annual kludge
+    if (
+        node.type === "task" &&
+        (node.hasTag("done") || node.hasTag("annual"))
+    ) {
         // register for updated due date
-        var newDueDate = dayjs("NONE");
+        var newDueDate = dayjs(""); // invalid date
 
-        // get the updated node
-        const done = dayjs(node.tagValue("done"));
+        // get the updated node; default to now
+        const done = dayjs(node.tagValue("done") || undefined);
 
         // what's the new due date?
+
         if (node.hasTag("recur")) {
             const recur = node.tagValue("recur") || "1";
             var days = parseInt(recur);
@@ -135,9 +141,27 @@ export function getRecurringTasks(node: TaskPaperNodeExt): TaskPaperNodeExt[] {
             // number of days
             node.setTag("due", newDueDate.format("YYYY-MM-DD"));
         }
-        /// TODO: other flags, like "dayOfMonth(1), weekly(Tuesday)," etc.
+        /// TODO: other flags, like "weekly(Tuesday)," etc.
 
-        results.push(node);
+        if (node.hasTag("annual")) {
+            let annual = dayjs(node.tagValue("annual") || "");
+            if (annual.isValid()) {
+                if (
+                    annual.month() === dayjs().month() &&
+                    annual.date() === dayjs().date()
+                ) {
+                    node.setTag(
+                        "due",
+                        annual.year(dayjs().year()).format("YYYY-MM-DD")
+                    );
+                }
+            }
+        }
+
+        // if we got a due date, push the task onto the due items stack
+        if (node.hasTag("due")) {
+            results.push(node);
+        }
     }
 
     return results;
