@@ -7,54 +7,6 @@ type SectionBounds = {
     last: number;
 };
 
-export function setYamlProperty(
-    editor: vscode.TextEditor,
-    propertyName: string,
-    propertyValue: string
-): void {
-    var isInSection: Boolean = false;
-    const yamlInsertLine = getYamlSectionLastLineNumber(editor, true);
-
-    // is there a Yaml section
-    for (let i = 0; i < editor.document.lineCount; i++) {
-        if (editor.document.lineAt(i).text === yamlDelimiter) {
-            isInSection = !isInSection;
-        } else if (/\S/.test(editor.document.lineAt(i).text)) {
-            // something other than whitespace?
-            if (isInSection) {
-                const parsed = editor.document.lineAt(i).text.split(":", 2);
-                if (parsed.length > 1) {
-                    if (parsed[0].toString().trim() === propertyName) {
-                        const lineSelection = new vscode.Selection(
-                            i,
-                            0,
-                            i,
-                            editor.document.lineAt(i).text.length
-                        );
-                        const newtext = Array(parsed[0], propertyValue).join(
-                            ": "
-                        );
-
-                        editor.edit((editBuilder) => {
-                            editBuilder.replace(lineSelection, newtext);
-                        });
-                    }
-                }
-            }
-        }
-    }
-
-    // property doesn't yet exist; go ahead and add it
-    const newline = Array(propertyName, propertyValue)
-        .join(": ")
-        .concat("\r\n");
-
-    editor.selections = [];
-    editor.edit((selectedText) => {
-        selectedText.insert(new vscode.Position(yamlInsertLine, 0), newline);
-    });
-}
-
 export function clearSection(
     editor: vscode.TextEditor,
     fromSection: string
@@ -107,52 +59,6 @@ export function getSectionLineNumber(
     }
 
     return ret;
-}
-
-export function getYamlSectionLastLineNumber(
-    editor: vscode.TextEditor,
-    createIfMissing: boolean
-): number {
-    const yamlDelimiter = "---";
-    var isInSection: boolean = false;
-    var i: number;
-
-    for (i = 0; i < editor.document.lineCount; i++) {
-        if (editor.document.lineAt(i).text === yamlDelimiter) {
-            if (isInSection) {
-                return i;
-            } else {
-                isInSection = true;
-            }
-        }
-    }
-
-    // there was no ending delimiter!
-    if (isInSection) {
-        return i;
-    }
-
-    // there is no YAML section
-    if (createIfMissing) {
-        const lines = Array(
-            "",
-            yamlDelimiter,
-            "# todotools settings for this document",
-            "",
-            yamlDelimiter
-        );
-
-        // insert the lines
-        editor.edit((sel) => {
-            sel.insert(
-                new vscode.Position(editor.document.lineCount + 1, 0),
-                lines.join("\r\n")
-            );
-            return i + 3; // return a pointer to the spot where stuff should be inserted
-        });
-    }
-
-    return -1;
 }
 
 export async function addLinesToSection(

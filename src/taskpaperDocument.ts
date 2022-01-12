@@ -14,8 +14,6 @@ import utc = require("dayjs/plugin/utc");
 import timezone = require("dayjs/plugin/timezone");
 import isSameOrBefore = require("dayjs/plugin/isSameOrBefore");
 import { TaskPaperNodeExt } from "./TaskPaperNodeExt";
-import { Task } from "vscode";
-import { stripYamlSection } from "./yaml-utilities";
 import { stripTrailingWhitespace } from "./strings";
 
 // work in the local time zone
@@ -34,11 +32,8 @@ dayjs.extend(isSameOrBefore);
  * @return {*} all the tasks in the document.
  */
 export function parseTaskDocument(taskdocument: string): TaskPaperNodeExt {
-    // TODO: switch from YAML to Settings project; OR
-    // update parser to ignore YAML
-    const yamlstripped = stripYamlSection(taskdocument);
     // TODO: update parser to ignore trailing whitespace
-    const cleaned = stripTrailingWhitespace(yamlstripped);
+    const cleaned = stripTrailingWhitespace(taskdocument);
     const doc = taskparser(cleaned);
     return new TaskPaperNodeExt(doc);
 }

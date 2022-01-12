@@ -1,13 +1,4 @@
 import * as vscode from "vscode";
-import YAML = require("yaml");
-
-import {
-    cleanYaml,
-    getYamlSection,
-    isCurrentRecurringItem,
-    parseYamlTasks,
-    yamlValue,
-} from "./yaml-utilities";
 import {
     autoRunInterval,
     yamlLastRunProperty,
@@ -17,7 +8,6 @@ import { Settings } from "./Settings";
 import dayjs = require("dayjs");
 import { getSection } from "./taskpaper-utils";
 import {
-    setYamlProperty,
     getSectionLineNumber,
     deleteLine,
     addLinesToSection,
@@ -72,7 +62,7 @@ export function activate(context: vscode.ExtensionContext) {
     };
 
     // get option for the automatic re-run interval
-    if (textEditor && yamlValue(textEditor, yamlRunDaily)) {
+    if (textEditor) {
         consoleChannel.appendLine("autorun interval set");
         // set the auto-run function to run
         setInterval(autoRunFunction, autoRunInterval);
@@ -96,10 +86,9 @@ export function activate(context: vscode.ExtensionContext) {
      * @param {vscode.TextEditor} editor
      */
     function automaticPerformCopy(editor: vscode.TextEditor) {
-        settings.readFromTextEditor(editor);
-        if (!settings.hasRunToday()) {
-            performCopyAndSave(editor);
-        }
+        // if (!settings.hasRunToday()) {
+        performCopyAndSave(editor);
+        // }
     }
 
     /**
@@ -111,13 +100,9 @@ export function activate(context: vscode.ExtensionContext) {
     function performCopyAndSave(editor: vscode.TextEditor) {
         try {
             performCopy(editor)
-                .then(() =>
-                    setYamlProperty(
-                        editor,
-                        yamlLastRunProperty,
-                        dayjs().toISOString()
-                    )
-                )
+                // .then(() =>
+                //     ( update last run property...)
+                // )
                 .then(() => editor.document.save())
                 .catch((reason: any) => {
                     if (reason instanceof Error) {
