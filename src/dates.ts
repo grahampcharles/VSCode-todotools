@@ -10,16 +10,7 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.tz.guess();
 
-// TODO: replace with dayjs.weekdays()
-export const dayNames = [
-    "Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-];
+export const dayNames = dayjs.weekdays();
 
 /// returns -1 on nonexistent
 export function dayNameToWeekday(dayName: string): number {
@@ -27,7 +18,8 @@ export function dayNameToWeekday(dayName: string): number {
     return dayNames.indexOf(dayName);
 }
 export function dayNamePluralToWeekday(dayName: string): number {
-    // find the singular version of the day name
+    // find the singular version of the day name by slicing off the last letter
+    // TODO: i8n; maybe replace with @weekly(Tuesday) or something, since day names are differently pluralized in different languages; e.g. los martes
     return dayNames.indexOf(dayName.slice(0, -1));
 }
 

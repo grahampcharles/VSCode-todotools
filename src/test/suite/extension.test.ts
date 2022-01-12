@@ -23,7 +23,6 @@ import { Settings } from "../../Settings";
 import dayjs = require("dayjs");
 import taskparse = require("taskpaper");
 import { stringToLines, stripTrailingWhitespace } from "../../strings";
-import { ParsedTask, parseTagValue, parseTagValues } from "../../ParsedTask";
 import { TagWithValue } from "../../TagWithValue";
 import { TaskPaperNode } from "../../types";
 
@@ -81,26 +80,6 @@ suite("Extension Test Suite", () => {
         );
     });
 
-    // test("getDueTasks", () => {
-    //     let testItem: string =
-    //         "Test Project:\n\t- test item @due(2022-01-09) @testing\n\t- not due yet @due(3000-01-10)";
-    //     let parsed = getDueTasks(testItem);
-    //     expect(parsed).to.have.lengthOf(1, "due tasks parsed");
-    //     expect(parsed[0])
-    //         .to.have.property("value")
-    //         .eql("test item", "due task name");
-    // });
-
-    test("ParsedTask", () => {
-        const testTask = new ParsedTask({
-            value: "test item",
-            tags: ["due(2022-01-09)", "testing"],
-        });
-
-        expect(testTask).to.have.property("value").eql("test item");
-        expect(testTask).to.have.property("tags").to.have.lengthOf(2);
-    });
-
     test("parseTagDocument", () => {
         const doc = testDocument;
         const parsed = taskparse(doc);
@@ -125,74 +104,12 @@ suite("Extension Test Suite", () => {
         expect(result).eq(`line 1\nline 2\nline 3\n\nline 4`);
     });
 
-    test("parseTagValue", () => {
-        expect(parseTagValue("test"))
-            .to.have.property("tag")
-            .eql("test", "simple task, no value");
-
-        const complex = parseTagValue("test(testvalue)");
-        expect(complex)
-            .to.have.property("tag")
-            .eql("test", "complex task: tag");
-        expect(complex)
-            .to.have.property("value")
-            .eql("testvalue", "complex task: value");
-    });
-
-    test("parseTagValues", () => {
-        // string-only array, no tags
-        const source1 = ["test1", "test2"];
-        const parse1 = parseTagValues(source1) ?? [];
-        expect(parse1).to.have.lengthOf(2, "string only array, no tags");
-        expect(parse1[0] ?? undefined).to.not.eql(
-            undefined,
-            "parse1[0]: defined"
-        );
-        expect(parse1[0] ?? {})
-            .to.have.property("tag")
-            .eql("test1", "parse1[0]: tag");
-        // TODO: how to test for undefined?
-        // expect(parse1[0] ?? {}).to.have.property("value").eql(undefined, 'parse1[0]: value');
-        expect(parse1[1] ?? undefined).to.not.eql(
-            undefined,
-            "parse1[1]: defined"
-        );
-        expect(parse1[1] ?? {})
-            .to.have.property("tag")
-            .eql("test2", "parse1[1]: tag");
-        // expect(parse1[1] ?? {}).to.have.property("value").eql(undefined, 'parse1[1]: value');
-
-        // string-only array, with values
-        const source2 = ["test1(value1)", "test2(value2)"];
-        const parse2 = parseTagValues(source2) ?? [];
-        expect(parse2).to.have.lengthOf(2, "string only array, with tags");
-        expect(parse2[0] ?? undefined).to.not.eql(
-            undefined,
-            "parse2[0]: defined"
-        );
-        expect(parse2[0] ?? {})
-            .to.have.property("tag")
-            .eql("test1", "parse2[0]: tag");
-        expect(parse2[0] ?? {})
-            .to.have.property("value")
-            .eql("value1", "parse2[0]: value");
-        expect(parse2[1] ?? undefined).to.not.eql(
-            undefined,
-            "parse2[1]: defined"
-        );
-        expect(parse2[1] ?? {})
-            .to.have.property("tag")
-            .eql("test2", "parse2[1]: tag");
-        expect(parse2[1] ?? {})
-            .to.have.property("value")
-            .eql("value2", "parse2[1]: value");
-
+    test("TagWithValue", () => {
         // array of TagWithValue
-        const source3 = [
-            { tag: "test1", value: "value1" } as TagWithValue,
-            { tag: "test2", value: "value2" } as TagWithValue,
+        const parse3 = [
+            new TagWithValue("test1", "value1"),
+            new TagWithValue("test2", "value2"),
         ];
-        const parse3 = parseTagValues(source3) ?? [];
         expect(parse3).to.have.lengthOf(2, "TagWithValue array");
         expect(parse3[0] ?? undefined).to.not.eql(
             undefined,

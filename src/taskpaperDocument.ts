@@ -6,7 +6,6 @@
 
 */
 
-import { ParsedTask } from "./ParsedTask";
 import taskparser = require("taskpaper");
 import { TaskPaperNode } from "./types";
 import dayjs = require("dayjs");
@@ -143,6 +142,7 @@ export function getRecurringTasks(node: TaskPaperNodeExt): TaskPaperNodeExt[] {
         }
         /// TODO: other flags, like "weekly(Tuesday)," etc.
 
+        /// LEFT OFF HERE: annual is running multiple times
         if (node.hasTag("annual")) {
             let annual = dayjs(node.tagValue("annual") || "");
             if (annual.isValid()) {

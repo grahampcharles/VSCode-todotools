@@ -14,7 +14,6 @@ import {
     replaceLine,
 } from "./texteditor-utils";
 import { stringToLines } from "./strings";
-import { ParsedTask } from "./ParsedTask";
 import {
     getDueTasks,
     getRecurringTasks,
@@ -68,7 +67,7 @@ export function activate(context: vscode.ExtensionContext) {
         setInterval(autoRunFunction, autoRunInterval);
     }
 
-    // DEBUG: implement a mock "pretend we just opened" command
+    // implement a mock "pretend we just opened" command
     disposable = vscode.commands.registerCommand("todotools.runOnOpen", () => {
         let textEditor = vscode.window.activeTextEditor;
         if (textEditor) {

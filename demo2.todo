@@ -1,16 +1,12 @@
 Today:
-	- this should be due and remain due for next year @due(2022-01-11)
-	- this should be due @due(2022-01-11) @good
-	- this should be due too @due(2022-01-11) @good
 	- whatever's already here
 	- eat groceries
-	- recur on Tuesdays @done(2022-01-10) @good
-	- happen on one Sunday @done(2022-01-10) @good
-	- done copy to future @done(2022-01-11) @good
+	- recur on Tuesdays @recur(Tuesdays) @done(2022-01-10) @good
+	- happen on one Sunday @recur(Sunday) @done(2022-01-10) @good	
+	- done copy to future @recur(2) @done(2022-01-11) @good
 
 Future:
-	- recur on Tuesdays @recur(Tuesdays) @good @due(2022-01-18)
-	- happen on one Sunday @good @due(2022-01-16)
-	- done copy to future @recur(2) @good @due(2022-01-13)
+	- this should be due @due(2022-01-11)  @good	
 	- this should not be due @due(2022-01-13) @good	
+	- this should be due too @due(2022-01-11) @good	
 	- this should be due and remain due for next year @annual(1/11)

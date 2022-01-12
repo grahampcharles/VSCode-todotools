@@ -1,4 +1,3 @@
-import { ParsedTask } from "./ParsedTask";
 import { TagWithValue } from "./TagWithValue";
 import { TaskPaperIndex, TaskPaperNode } from "./types";
 
