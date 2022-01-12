@@ -60,9 +60,9 @@ suite("Extension Test Suite", () => {
         );
 
         const day = dayjs("2022-01-11"); // this is a Tuesday, day 2
-        expect(daysUntilWeekday(2)).to.equal(7, "until Tuesday");
-        expect(daysUntilWeekday(3)).to.equal(1, "until Wednesday");
-        expect(daysUntilWeekday(0)).to.equal(5, "until Sunday");
+        expect(daysUntilWeekday(2, day)).to.equal(7, "until Tuesday");
+        expect(daysUntilWeekday(3, day)).to.equal(1, "until Wednesday");
+        expect(daysUntilWeekday(0, day)).to.equal(5, "until Sunday");
     });
 
     test("string utilities", () => {

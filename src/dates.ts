@@ -51,8 +51,11 @@ export const daysSinceTheBeginningOfTime = daysPassed(
     todayDay.toDate()
 );
 
-export function daysUntilWeekday(weekday: number): number {
-    var days = weekday - dayjs().day();
+export function daysUntilWeekday(
+    weekday: number,
+    fromday: dayjs.Dayjs = dayjs()
+): number {
+    var days = weekday - fromday.day();
     if (days <= 0) {
         days = days + 7;
     }
