@@ -2,9 +2,11 @@ import * as assert from "assert";
 import * as vscode from "vscode";
 import * as chai from "chai";
 import {
+    dayNamePluralToWeekday,
     dayNames,
     dayNameToWeekday,
     daysPassed,
+    daysUntilWeekday,
     monthNameToNumber,
     todayDay,
     todayName,
@@ -45,6 +47,23 @@ suite("Extension Test Suite", () => {
             "month name to number"
         );
         expect(dayNameToWeekday("Monday")).to.equal(1, "day name to weekday");
+        expect(dayNamePluralToWeekday("Monday")).to.equal(
+            -1,
+            "day name plural to weekday"
+        );
+        expect(dayNameToWeekday("Mondays")).to.equal(
+            -1,
+            "day name to weekday -- not plural"
+        );
+        expect(dayNamePluralToWeekday("Mondays")).to.equal(
+            1,
+            "day name plural to weekday"
+        );
+
+        const day = dayjs("2022-01-11"); // this is a Tuesday, day 2
+        expect(daysUntilWeekday(2)).to.equal(7, "until Tuesday");
+        expect(daysUntilWeekday(3)).to.equal(1, "until Wednesday");
+        expect(daysUntilWeekday(0)).to.equal(5, "until Sunday");
     });
 
     test("string utilities", () => {

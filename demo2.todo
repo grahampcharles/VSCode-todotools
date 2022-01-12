@@ -3,16 +3,10 @@ Today:
 	- eat groceries
 	- every other day task two
 	- mow lawn 
-	- every Saturday test
+	- recur on Tuesdays @done @recur(Tuesdays)
 	- done copy to future @done(2022-01-11) @recur(2)
 
 Future:
 	- this should be due @due(2022-01-11)
 	- this should not be due @due(2022-01-13)
 	- this should be due too @due(2022-01-11)
-
----
-# todotools settings for this document
-runOnOpen: True
-runDaily: True
----

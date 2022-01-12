@@ -82,7 +82,7 @@ export function activate(context: vscode.ExtensionContext) {
     ////////////////
 
     /**
-     *Automatically run the copy, unless we have already run today (using local time)
+     *Automatically run the copy
      * @param {vscode.TextEditor} editor
      */
     function automaticPerformCopy(editor: vscode.TextEditor) {

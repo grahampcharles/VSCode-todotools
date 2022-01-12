@@ -15,6 +15,11 @@ import timezone = require("dayjs/plugin/timezone");
 import isSameOrBefore = require("dayjs/plugin/isSameOrBefore");
 import { TaskPaperNodeExt } from "./TaskPaperNodeExt";
 import { stripTrailingWhitespace } from "./strings";
+import {
+    dayNamePluralToWeekday,
+    dayNameToWeekday,
+    daysUntilWeekday,
+} from "./dates";
 
 // work in the local time zone
 dayjs.extend(utc);
@@ -33,7 +38,11 @@ dayjs.extend(isSameOrBefore);
  */
 export function parseTaskDocument(taskdocument: string): TaskPaperNodeExt {
     // TODO: update parser to ignore trailing whitespace
-    const cleaned = stripTrailingWhitespace(taskdocument);
+    // TODO: fix parser to handle /r/n
+    const cleaned = stripTrailingWhitespace(taskdocument).replace(
+        /\r\n/gm,
+        "\n"
+    );
     const doc = taskparser(cleaned);
     return new TaskPaperNodeExt(doc);
 }
@@ -89,7 +98,33 @@ export function getRecurringTasks(node: TaskPaperNodeExt): TaskPaperNodeExt[] {
 
         // what's the new due date?
         if (node.hasTag("recur")) {
-            const days = parseInt(node.tagValue("recur") ?? "1", 0) || 1;
+            const recur = node.tagValue("recur") || "1";
+            var days = parseInt(recur);
+
+            if (isNaN(days)) {
+                // pattern 1: day of the week, pluralized
+                var test = dayNamePluralToWeekday(recur);
+                if (test !== -1) {
+                    // set to be due on the next day of that name
+                    days = daysUntilWeekday(test);
+                }
+
+                // patter 2: day of the week, singular
+                test = dayNameToWeekday(recur);
+                if (test !== -1) {
+                    // set to be due on the next day of that name
+                    days = daysUntilWeekday(test);
+                    // remove the recurrence; this only happens once
+                    node.removeTag("recur");
+                }
+            }
+
+            // default: recur every day
+            if (isNaN(days)) {
+                days = 1;
+            }
+
+            // number of days
             node.setTag("due", done.add(days, "day").format("YYYY-MM-DD"));
         }
         /// TODO: other flags, like "dayOfMonth(1), weekly(Tuesday)," etc.
