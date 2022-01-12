@@ -44,13 +44,6 @@ export function treatAsUTC(date: Date): number {
 export const todayDay = dayjs();
 export const todayName = dayNames[todayDay.day()];
 
-// how many days have passed since the beginning of time?
-// TODO: use dayjs for this?
-export const daysSinceTheBeginningOfTime = daysPassed(
-    new Date(0),
-    todayDay.toDate()
-);
-
 export function daysUntilWeekday(
     weekday: number,
     fromday: dayjs.Dayjs = dayjs()
