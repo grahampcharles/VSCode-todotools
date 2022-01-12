@@ -205,7 +205,6 @@ export function activate(context: vscode.ExtensionContext) {
             });
 
             // delete all the lines, starting from the highest-numbered
-            // TODO: chain these
             for (const line of deletes.sort((a, b) => b - a)) {
                 await deleteLine(textEditor, line);
             }

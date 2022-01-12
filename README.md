@@ -4,6 +4,9 @@ The `todotools` extension adds some task list management shortcuts for TaskPaper
 
 ## Features
 
+** Thoughts **: 
+The copy-to-Today could be optional; could also copy in place to the same project
+
 **Copy Daily Tasks to Today**
 : This task will copy any tasks in a "Daily" section into a "Today" section, unless they are already there. This allows you to create daily tasks (e.g. "Feed the cat") without having to re-type them,
 

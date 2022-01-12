@@ -93,6 +93,9 @@ export function getRecurringTasks(node: TaskPaperNodeExt): TaskPaperNodeExt[] {
 
     // push any tasks that are due on or before today
     if (node.type === "task" && node.hasTag("done")) {
+        // register for updated due date
+        var newDueDate = dayjs("NONE");
+
         // get the updated node
         const done = dayjs(node.tagValue("done"));
 
@@ -106,14 +109,14 @@ export function getRecurringTasks(node: TaskPaperNodeExt): TaskPaperNodeExt[] {
                 var test = dayNamePluralToWeekday(recur);
                 if (test !== -1) {
                     // set to be due on the next day of that name
-                    days = daysUntilWeekday(test);
+                    newDueDate = dayjs().add(daysUntilWeekday(test), "day");
                 }
 
                 // patter 2: day of the week, singular
                 test = dayNameToWeekday(recur);
                 if (test !== -1) {
                     // set to be due on the next day of that name
-                    days = daysUntilWeekday(test);
+                    newDueDate = dayjs().add(daysUntilWeekday(test), "day");
                     // remove the recurrence; this only happens once
                     node.removeTag("recur");
                 }
@@ -124,8 +127,13 @@ export function getRecurringTasks(node: TaskPaperNodeExt): TaskPaperNodeExt[] {
                 days = 1;
             }
 
+            // use days if needed
+            if (!newDueDate.isValid()) {
+                newDueDate = done.add(days, "day");
+            }
+
             // number of days
-            node.setTag("due", done.add(days, "day").format("YYYY-MM-DD"));
+            node.setTag("due", newDueDate.format("YYYY-MM-DD"));
         }
         /// TODO: other flags, like "dayOfMonth(1), weekly(Tuesday)," etc.
 

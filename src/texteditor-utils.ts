@@ -28,11 +28,10 @@ export function deleteLine(
     editor: vscode.TextEditor,
     line: number
 ): Thenable<boolean> {
-    const range = new vscode.Range(line, 0, line + 1, 0);
+    const range = new vscode.Range(line - 1, 0, line, 0);
     const edit = new vscode.WorkspaceEdit();
     edit.delete(editor.document.uri, range);
-    const applyThenable = vscode.workspace.applyEdit(edit);
-    return applyThenable;
+    return vscode.workspace.applyEdit(edit);
 }
 
 export function getSectionLineNumber(
