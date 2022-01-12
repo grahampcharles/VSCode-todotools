@@ -7,6 +7,6 @@ Today:
 
 Future:
 	- this should be due @due(2022-01-11)  @good	
-	- this should not be due @due(2022-01-13) @good	
+	- this should not be due @due(2022-01-13) 
 	- this should be due too @due(2022-01-11) @good	
 	- this should be due and remain due for next year @annual(1/11)

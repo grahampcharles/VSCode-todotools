@@ -10,11 +10,13 @@ export class TagWithValue {
         }
 
         // match tag(value) or tag or tag()
-        const patternMatch = (
-            tag.match(/^(.*?)(?:\((.*)\))?$/) || [undefined, tag, undefined]
-        ).slice(1, 2);
-        this.tag = patternMatch[0] || tag;
-        this.value = patternMatch[1] || undefined;
+        const patternMatch = new RegExp(/^(.*?)(?:\((.*)\))?$/gm).exec(tag) || [
+            undefined,
+            tag, // default to the whole tag if the regexp chokes
+            undefined,
+        ];
+        this.tag = patternMatch[1] || tag;
+        this.value = patternMatch[2] || undefined;
     }
 
     toString(): string {

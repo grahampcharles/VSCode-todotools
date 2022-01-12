@@ -105,6 +105,13 @@ suite("Extension Test Suite", () => {
     });
 
     test("TagWithValue", () => {
+        const tag1 = new TagWithValue("simpletag");
+        expect(tag1).to.have.property("tag").eql("simpletag");
+
+        const tag2 = new TagWithValue("due(2022-01-01)");
+        expect(tag2).to.have.property("tag").eql("due");
+        expect(tag2).to.have.property("value").eql("2022-01-01");
+
         // array of TagWithValue
         const parse3 = [
             new TagWithValue("test1", "value1"),
