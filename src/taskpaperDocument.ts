@@ -6,8 +6,8 @@
 
 */
 
+import * as vscode from "vscode";
 import taskparser = require("taskpaper");
-import { TaskPaperNode } from "./types";
 import dayjs = require("dayjs");
 import utc = require("dayjs/plugin/utc");
 import timezone = require("dayjs/plugin/timezone");
@@ -35,15 +35,23 @@ dayjs.extend(isSameOrBefore);
  * @param {*} document Document returned by the taskpaper parser.
  * @return {*} all the tasks in the document.
  */
-export function parseTaskDocument(taskdocument: string): TaskPaperNodeExt {
-    // TODO: update parser to ignore trailing whitespace
-    // TODO: fix parser to handle /r/n
-    const cleaned = stripTrailingWhitespace(taskdocument).replace(
-        /\r\n/gm,
-        "\n"
-    );
-    const doc = taskparser(cleaned);
-    return new TaskPaperNodeExt(doc);
+export async function parseTaskDocument(
+    editor: vscode.TextEditor
+): Promise<TaskPaperNodeExt | undefined> {
+    // parse the taskpaper again if possible
+    try {
+        const text = editor.document.getText();
+
+        // TODO: update parser to ignore trailing whitespace
+        // TODO: fix parser to handle /r/n
+        const cleaned = stripTrailingWhitespace(text).replace(/\r\n/gm, "\n");
+        const doc = taskparser(cleaned);
+        return new TaskPaperNodeExt(doc);
+    } catch (error: any) {
+        // report error to user
+        await vscode.window.showInformationMessage(error.toString());
+        return undefined;
+    }
 }
 
 /**
@@ -79,13 +87,15 @@ export function getDueTasks(node: TaskPaperNodeExt): TaskPaperNodeExt[] {
     return results;
 }
 
-// Returns tasks that are have a recurrence flag
-export function getRecurringTasks(node: TaskPaperNodeExt): TaskPaperNodeExt[] {
+// Returns tasks that have a recurrence flag
+export function getRecurringTasks(
+    inputnode: TaskPaperNodeExt
+): TaskPaperNodeExt[] {
     const results = new Array<TaskPaperNodeExt>();
 
     // does this node have children? if so, act on the children
-    if (node.children !== undefined) {
-        node.children.forEach((childnode) =>
+    if (inputnode.children !== undefined) {
+        inputnode.children.forEach((childnode) =>
             results.push(...getRecurringTasks(childnode))
         );
     }
@@ -93,10 +103,10 @@ export function getRecurringTasks(node: TaskPaperNodeExt): TaskPaperNodeExt[] {
     // push any tasks that are due on or before today
     // TODO: doesn't always have to say "done," right?
     // remove the done || annual kludge
-    if (
-        node.type === "task" &&
-        (node.hasTag("done") || node.hasTag("annual"))
-    ) {
+    if (inputnode.type === "task" && inputnode.hasTag("done")) {
+        // clone the node
+        const node = inputnode.clone();
+
         // register for updated due date
         var newDueDate = dayjs(""); // invalid date
 
@@ -104,7 +114,6 @@ export function getRecurringTasks(node: TaskPaperNodeExt): TaskPaperNodeExt[] {
         const done = dayjs(node.tagValue("done") || undefined);
 
         // what's the new due date?
-
         if (node.hasTag("recur")) {
             const recur = node.tagValue("recur") || "1";
             var days = parseInt(recur);
@@ -140,26 +149,10 @@ export function getRecurringTasks(node: TaskPaperNodeExt): TaskPaperNodeExt[] {
             // number of days
             node.setTag("due", newDueDate.format("YYYY-MM-DD"));
         }
-        /// TODO: other flags, like "weekly(Tuesday)," etc.
-
-        /// LEFT OFF HERE: annual is running multiple times
-        if (node.hasTag("annual")) {
-            let annual = dayjs(node.tagValue("annual") || "");
-            if (annual.isValid()) {
-                if (
-                    annual.month() === dayjs().month() &&
-                    annual.date() === dayjs().date()
-                ) {
-                    node.setTag(
-                        "due",
-                        annual.year(dayjs().year()).format("YYYY-MM-DD")
-                    );
-                }
-            }
-        }
 
         // if we got a due date, push the task onto the due items stack
         if (node.hasTag("due")) {
+            // is this node already present?
             results.push(node);
         }
     }
@@ -167,25 +160,57 @@ export function getRecurringTasks(node: TaskPaperNodeExt): TaskPaperNodeExt[] {
     return results;
 }
 
-// function parseTaskNode(node: TaskPaperNode): ParsedTask[] {
-//     const results = new Array<ParsedTask>();
+// Returns tasks that have a recurrence flag
+export function getTasksNeedingUpdate(
+    node: TaskPaperNodeExt
+): TaskPaperNodeExt[] {
+    const results = new Array<TaskPaperNodeExt>();
 
-//     // does this node have children? if so, act on the children
-//     if (node.children !== undefined) {
-//         node.children.forEach((childnode) =>
-//             results.push(...parseTaskNode(childnode))
-//         );
-//     }
+    // does this node have children? if so, act on the children
+    if (node.children !== undefined) {
+        node.children.forEach((childnode) =>
+            results.push(...getTasksNeedingUpdate(childnode))
+        );
+    }
 
-//     if (node.type === "task") {
-//         // return the task itself
-//         results.push(
-//             new ParsedTask({
-//                 value: node.value ?? "UNDEFINED TASK",
-//                 tags: node.tags ?? [],
-//             } as ParsedTaskInput)
-//         );
-//     }
+    // push any tasks that are due on or before today
+    if (node.type === "task" && node.hasTag("annual") && !node.hasTag("due")) {
+        // register for updated due date
+        var newDueDate = dayjs(""); // invalid date
 
-//     return results;
-// }
+        /// annual recurrence
+        if (node.hasTag("annual")) {
+            let annual = dayjs(node.tagValue("annual") || "");
+            if (annual.isValid()) {
+                // get the next annual occurence
+                newDueDate = annual.year(dayjs().year());
+                if (dayjs().isAfter(newDueDate, "day")) {
+                    newDueDate = newDueDate.add(1, "year");
+                }
+                try {
+                    node.setTag("due", newDueDate.format("YYYY-MM-DD"));
+                } catch (error: any) {
+                    console.log(error.toString());
+                }
+            }
+        }
+
+        // if we got a valid due date, push the task onto the due items stack
+        if (node.hasTag("due")) {
+            // is this node already present?
+            results.push(node);
+        }
+    }
+
+    return results;
+}
+
+export function removeDuplicates(
+    nodeList: TaskPaperNodeExt[],
+    masterNode: TaskPaperNodeExt
+): TaskPaperNodeExt[] {
+    // removes any items in the nodeList that already exist on the masterNode
+    return nodeList.filter((node) => {
+        return !masterNode.containsItem(node);
+    });
+}

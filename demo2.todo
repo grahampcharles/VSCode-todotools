@@ -3,7 +3,7 @@ Today:
 	- eat groceries
 	- recur on Tuesdays @recur(Tuesdays) @done(2022-01-10) @good
 	- happen on one Sunday @recur(Sunday) @done(2022-01-10) @good	
-	- done copy to future @recur(2) @done(2022-01-11) @good
+	- done copy to future @recur(2) @done(2022-01-10) @good
 
 Future:
 	- this should be due @due(2022-01-11)  @good	

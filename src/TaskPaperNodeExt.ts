@@ -10,7 +10,7 @@ export class TaskPaperNodeExt {
     depth: number;
     index: TaskPaperIndex;
 
-    constructor(v: TaskPaperNode) {
+    constructor(v: TaskPaperNode | TaskPaperNodeExt) {
         this.type = v.type;
         this.value = v.value;
         this.tags = v.tags;
@@ -66,6 +66,7 @@ export class TaskPaperNodeExt {
             return;
         }
         this.tagsParsed[index].value = tagValue;
+        this.updateTags();
     }
 
     removeTag(tagName: string | string[]): void {
@@ -77,10 +78,35 @@ export class TaskPaperNodeExt {
         }
 
         this.tagsParsed = this.tagsParsed?.filter((tag) => tag.tag !== tagName);
-        this.updateTags;
+        this.updateTags();
     }
 
-    private updateTags() {
+    containsItem(nodeToMatch: TaskPaperNodeExt): boolean {
+        var match = this.matches(nodeToMatch);
+
+        // check children
+        if (!match && this.children !== undefined) {
+            match = this.children?.some((childnode) =>
+                childnode.containsItem(nodeToMatch)
+            );
+        }
+        return match;
+    }
+
+    clone(): TaskPaperNodeExt {
+        return new TaskPaperNodeExt(this);
+    }
+
+    private matches(nodeToMatch: TaskPaperNodeExt): boolean {
+        // TODO: is this enought to a match?
+        return (
+            this.type === "task" &&
+            this.value === nodeToMatch.value &&
+            this.tagValue("due") === nodeToMatch.tagValue("due")
+        );
+    }
+
+    private updateTags(): void {
         this.tags = this.tagsParsed?.map((tag) => {
             if (tag.value === undefined) {
                 return tag.tag;

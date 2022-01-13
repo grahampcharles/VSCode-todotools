@@ -1,9 +1,5 @@
 import * as vscode from "vscode";
-import {
-    autoRunInterval,
-    yamlLastRunProperty,
-    yamlRunDaily,
-} from "./constants";
+import { autoRunInterval } from "./constants";
 import { Settings } from "./Settings";
 import dayjs = require("dayjs");
 import { getSection } from "./taskpaper-utils";
@@ -17,7 +13,9 @@ import { stringToLines } from "./strings";
 import {
     getDueTasks,
     getRecurringTasks,
+    getTasksNeedingUpdate,
     parseTaskDocument,
+    removeDuplicates,
 } from "./taskpaperDocument";
 import { TaskPaperNodeExt } from "./TaskPaperNodeExt";
 
@@ -132,21 +130,23 @@ export function activate(context: vscode.ExtensionContext) {
             // get the "future" section
             var text = textEditor.document.getText();
             const future = getSection(stringToLines(text), "Future");
-            var items: TaskPaperNodeExt;
 
-            // parse the taskpaper if possible
-            try {
-                items = parseTaskDocument(text);
-            } catch (error: any) {
-                // report error to user
-                await vscode.window.showInformationMessage(error.toString());
+            var items: TaskPaperNodeExt | undefined = await parseTaskDocument(
+                textEditor
+            );
+            if (items === undefined) {
                 return false;
             }
 
             // 1. copy FUTURE tasks to Future
             ////////////////////////////////////
             var newFutures = new Array<string>();
-            const futureTasks = getRecurringTasks(items);
+
+            // TODO: this mutuates the Items node, and probably shouldn't
+            var recurring = getRecurringTasks(items);
+
+            // remove anything that's already in the items
+            const futureTasks = removeDuplicates(recurring, items);
 
             // add future tasks
             for (const task of futureTasks) {
@@ -159,13 +159,7 @@ export function activate(context: vscode.ExtensionContext) {
 
                 // create future task
                 newFutures.push(
-                    task.toString([
-                        "done",
-                        "project",
-                        "lasted",
-                        "started",
-                        "annual",
-                    ])
+                    task.toString(["done", "project", "lasted", "started"])
                 );
             }
 
@@ -181,15 +175,8 @@ export function activate(context: vscode.ExtensionContext) {
             // 2. move DUE tasks to Today
             ///////////////////////////////
 
-            // re-parse to account for changes
-            text = textEditor.document.getText();
-
-            // parse the taskpaper again if possible
-            try {
-                items = parseTaskDocument(text);
-            } catch (error: any) {
-                // report error to user
-                await vscode.window.showInformationMessage(error.toString());
+            items = await parseTaskDocument(textEditor);
+            if (items === undefined) {
                 return false;
             }
 
@@ -221,6 +208,20 @@ export function activate(context: vscode.ExtensionContext) {
 
             // insert the lines
             await addLinesToSection(textEditor, "Today", linesToAdd);
+
+            /// 3. Update tasks
+            //////////////////////
+
+            items = await parseTaskDocument(textEditor);
+            if (items === undefined) {
+                return false;
+            }
+
+            // tasks to update
+            const updateTasks = getTasksNeedingUpdate(items);
+            for (const task of updateTasks) {
+                await replaceLine(textEditor, task.index.line, task.toString());
+            }
         }
 
         // nothing to execute: return true
