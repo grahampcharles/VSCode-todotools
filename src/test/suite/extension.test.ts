@@ -2,6 +2,7 @@ import * as assert from "assert";
 import * as vscode from "vscode";
 import * as chai from "chai";
 import {
+    cleanDate,
     dayNamePluralToWeekday,
     dayNames,
     dayNameToWeekday,
@@ -28,6 +29,15 @@ import { TaskPaperNode } from "../../types";
 
 suite("Extension Test Suite", () => {
     vscode.window.showInformationMessage("Start all tests.");
+
+    test("clean date", () => {
+        const date1 = cleanDate("1/11");
+        expect(date1.year()).eq(2001);
+        expect(date1.format("YYYY-MM-DD")).eq(`2001-01-11`);
+
+        const date2 = cleanDate("22-01-13 13:45");
+        expect(date2.format("YYYY-MM-DD HH:mm")).eq("2022-01-13 13:45");
+    });
 
     test("date functions", () => {
         const date1 = new Date(2020, 1, 3);
@@ -59,7 +69,7 @@ suite("Extension Test Suite", () => {
             "day name plural to weekday"
         );
 
-        const day = dayjs("2022-01-11"); // this is a Tuesday, day 2
+        const day = cleanDate("2022-01-11"); // this is a Tuesday, day 2
         expect(daysUntilWeekday(2, day)).to.equal(7, "until Tuesday");
         expect(daysUntilWeekday(3, day)).to.equal(1, "until Wednesday");
         expect(daysUntilWeekday(0, day)).to.equal(5, "until Sunday");

@@ -3,6 +3,10 @@ import dayjs = require("dayjs");
 import utc = require("dayjs/plugin/utc");
 import timezone = require("dayjs/plugin/timezone");
 import localedata = require("dayjs/plugin/localeData");
+import customParseFormat = require("dayjs/plugin/customParseFormat");
+
+// extend the parse formatter
+dayjs.extend(customParseFormat);
 
 // work in the local time zone and locale
 dayjs.extend(localedata);
@@ -10,7 +14,24 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.tz.guess();
 
+const FORMAT_STRINGS = [
+    "YYYY-MM-DD hh:mm:ss",
+    "YY-MM-DD hh:mm:ss",
+    "YY-MM-DD hh:mm",
+    "YY-MM-DD",
+];
+
 export const dayNames = dayjs.weekdays();
+
+export function cleanDate(dayString: string | undefined): dayjs.Dayjs {
+    // attempts to turn the string into a Dayjs object
+    var ret = dayjs(dayString);
+    if (!ret.isValid()) {
+        ret = dayjs(dayString, FORMAT_STRINGS);
+    }
+
+    return ret;
+}
 
 /// returns -1 on nonexistent
 export function dayNameToWeekday(dayName: string): number {
