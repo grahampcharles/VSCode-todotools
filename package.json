@@ -3,7 +3,7 @@
     "displayName": "ToDoTools",
     "publisher": "grahampcharles",
     "description": "Auxilary functions for taskpaper documents.",
-    "version": "0.3.3",
+    "version": "0.4.0",
     "repository": {
         "type": "git",
         "url": "git://github.com/grahampcharles/VSCode-todotools.git"
@@ -65,6 +65,6 @@
         "chai": "^4.3.4",
         "dayjs": "^1.10.7",
         "ftp": "^0.3.10",
-        "taskpaper": "^1.1.0"
+        "taskpaper": "github:grahampcharles/taskpaper.js"
     }
 }

@@ -3,12 +3,17 @@
 All notable changes to the "todotools" extension will be documented in this file.
 ( Added, Changed, Deprecated, Removed, Fixed, Security)
 
-## To Do:
+## ToDo - Unreleased
+
+### fixed
+
+-   completed @annual items should be copied back into the @future section
+
+## [0.4.0] - 2022-01-12:
 
 ### added
 
--   remove contents of dated "one time only" section, like "11/2/2021"
--   support subsections within the yaml (e.g. "daily")
+-   removed all YAML sections in favor of @recur(number), @recur(days), and @annual(M/DD) tags
 
 ### fixed
 
