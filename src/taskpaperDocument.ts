@@ -120,9 +120,6 @@ export function getFutureTasks(
     // clone the node
     const newnode = inputnode.clone();
 
-    // register for updated due date
-    var newDueDate = dayjs(""); // intentionally invalid date
-
     // #1: recurring, no due date assigned
     if (newnode.hasTag("recur") && !newnode.hasTag("due")) {
         // get the updated due date; default to now
@@ -133,7 +130,7 @@ export function getFutureTasks(
         );
 
         // set the updated due date
-        newnode.setTag("due", newDueDate.format("YYYY-MM-DD"));
+        newnode.setTag("due", due.format("YYYY-MM-DD"));
 
         // remove the recur flag from the current location
         inputnode.removeTag("recur");
