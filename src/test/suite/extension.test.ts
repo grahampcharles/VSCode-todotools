@@ -7,6 +7,7 @@ import {
     dayNameToWeekday,
     daysPassed,
     daysUntilWeekday,
+    getDaysFromRecurrencePattern,
     monthNameToNumber,
     todayDay,
     todayName,
@@ -22,6 +23,7 @@ import {
 } from "../../strings";
 import { TagWithValue } from "../../TagWithValue";
 import { TaskPaperNode } from "../../types";
+import dayjs = require("dayjs");
 
 suite("Extension Test Suite", () => {
     vscode.window.showInformationMessage("Start all tests.");
@@ -33,6 +35,16 @@ suite("Extension Test Suite", () => {
 
         const date2 = cleanDate("22-01-13 13:45");
         expect(date2.format("YYYY-MM-DD HH:mm")).eq("2022-01-13 13:45");
+
+        expect(cleanDate("2020-01-03").format("YYYY-MM-DD")).eq(
+            "2020-01-03",
+            "simple date"
+        );
+    });
+
+    test("getDaysFromRecurrencePattern", () => {
+        expect(getDaysFromRecurrencePattern("2")).to.eql(2, "in two days");
+        expect(getDaysFromRecurrencePattern(undefined)).to.eql(1, "undefined");
     });
 
     test("getSectionLineNumber", () => {
