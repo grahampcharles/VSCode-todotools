@@ -12,7 +12,7 @@ import {
 import { stringToLines } from "./strings";
 import {
     getDueTasks,
-    getRecurringTasks,
+    getFutureTasks,
     getTasksNeedingUpdate,
     parseTaskDocument,
     removeDuplicates,
@@ -143,7 +143,7 @@ export function activate(context: vscode.ExtensionContext) {
             var newFutures = new Array<string>();
 
             // TODO: this mutuates the Items node, and probably shouldn't
-            var recurring = getRecurringTasks(items);
+            var recurring = getFutureTasks(items);
 
             // remove anything that's already in the items
             const futureTasks = removeDuplicates(recurring, items);
@@ -154,7 +154,7 @@ export function activate(context: vscode.ExtensionContext) {
                 await replaceLine(
                     textEditor,
                     task.index.line,
-                    task.toString(["recur", "due"])
+                    task.toString(["recur", "annual"])
                 );
 
                 // create future task
