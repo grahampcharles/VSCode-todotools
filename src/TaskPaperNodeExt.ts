@@ -50,8 +50,13 @@ export class TaskPaperNodeExt {
         return undefined;
     }
 
-    hasTag(tagName: string): boolean {
-        return this.tagsParsed?.some((tag) => tag.tag === tagName) ?? false;
+    hasTag(tagNames: string | string[]): boolean {
+        if (typeof tagNames === "string") {
+            tagNames = [tagNames];
+        }
+        return (
+            this.tagsParsed?.some((tag) => tagNames.includes(tag.tag)) ?? false
+        );
     }
 
     setTag(tagName: string, tagValue: string): void {

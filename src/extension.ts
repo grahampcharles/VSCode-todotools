@@ -11,6 +11,7 @@ import {
 } from "./texteditor-utils";
 import { getSectionLineNumber, stringToLines } from "./strings";
 import {
+    getDueTasks,
     getFutureTasks,
     getUpdates,
     parseTaskDocument,
@@ -146,26 +147,8 @@ export function activate(context: vscode.ExtensionContext) {
             var futureTasks = getFutureTasks(items);
             var futureString = futureTasks.map((node) => node.toString());
 
-            // Process any updates and deletes, in reverse order of line
-            // returns a flat map of only nodes that require an update
-            var updates = getUpdates(items).sort(
-                (nodeA, nodeB) => nodeB.index.line - nodeA.index.line
-            );
-
-            for (const updateNode of updates) {
-                if (updateNode.tagValue("action") === "DELETE") {
-                    // delete the line
-                    await deleteLine(textEditor, updateNode.index.line);
-                }
-                if (updateNode.tagValue("action") === "UPDATE") {
-                    // replace the line
-                    await replaceLine(
-                        textEditor,
-                        updateNode.index.line,
-                        updateNode.toString(["action"])
-                    );
-                }
-            }
+            // process any updates
+            await processUpdates(items, textEditor);
 
             /// 3. ADD FUTURES
             // remove anything that's already in the future section,
@@ -180,44 +163,57 @@ export function activate(context: vscode.ExtensionContext) {
             // // 2. move DUE tasks to Today
             // ///////////////////////////////
 
-            // items = await parseTaskDocument(textEditor);
-            // if (items === undefined) {
-            //     return false;
-            // }
+            // re-parse document to account for changes in part 1
+            items = await parseTaskDocument(textEditor);
+            if (items === undefined) {
+                return false;
+            }
 
-            // // get due items
-            // const due = getDueTasks(items);
-            // const adds = new Array<string>();
-            // const deletes = new Array<number>();
+            // get newly due items
+            const due = getDueTasks(items);
 
-            // due.forEach((item) => {
-            //     // clear extraneous tags
-            //     item.removeTag(["project", "lasted", "started", "done"]);
-            //     // set to depth 2 (only top-level Today is allowed)
-            //     item.depth = 2;
-            //     // add task
-            //     adds.push(item.toString());
-            //     // delete line
-            //     deletes.push(item.index.line);
-            // });
+            // process any node updates
+            // TODO: that this will cause badness if Today is not the first section!
+            await processUpdates(items, textEditor);
 
-            // // delete all the lines, starting from the highest-numbered
-            // for (const line of deletes.sort((a, b) => b - a)) {
-            //     await deleteLine(textEditor, line);
-            // }
-
-            // // add all the new lines
-            // const linesToAdd = adds.map((add) => {
-            //     return add.toString();
-            // });
-
-            // // insert the lines
-            // await addLinesToSection(textEditor, "Today", linesToAdd);
+            // add the new lines to the today section
+            await addLinesToSection(
+                textEditor,
+                "Today",
+                due.map((item) => item.toString())
+            );
         }
 
         // nothing to execute: return true
         return new Promise<boolean>(() => true);
     }
+}
+
+async function processUpdates(
+    items: TaskPaperNodeExt,
+    textEditor: vscode.TextEditor
+): Promise<boolean> {
+    // Process any updates and deletes, in reverse order of line
+    // returns a flat map of only nodes that require an update
+    var updates = getUpdates(items).sort(
+        (nodeA, nodeB) => nodeB.index.line - nodeA.index.line
+    );
+
+    for (const updateNode of updates) {
+        if (updateNode.tagValue("action") === "DELETE") {
+            // delete the line
+            await deleteLine(textEditor, updateNode.index.line);
+        }
+        if (updateNode.tagValue("action") === "UPDATE") {
+            // replace the line
+            await replaceLine(
+                textEditor,
+                updateNode.index.line,
+                updateNode.toString(["action"])
+            );
+        }
+    }
+    return true;
 }
 
 export function deactivate() {}

@@ -68,14 +68,26 @@ export function getDueTasks(node: TaskPaperNodeExt): TaskPaperNodeExt[] {
         }
     }
 
+    // only act on undone tasks
+    if (node.type !== "task" || node.hasTag("done")) {
+        return results;
+    }
+
     // push any tasks that are due on or before today
     if (
-        node.type === "task" &&
         node.hasTag("due") &&
         cleanDate(node.tagValue("due")).isSameOrBefore(dayjs(), "day")
     ) {
-        // return the task itself
-        results.push(node);
+        // return a clone of the task
+        const newnode = node.clone();
+        // clear metatags relating to task completion
+        newnode.removeTag(["project", "lasted", "started"]);
+        // force all "Today" nodes to depth 2
+        newnode.depth = 2;
+        results.push(newnode);
+
+        // set the task to be erased
+        node.setTag("action", "DELETE");
     }
 
     return results;
@@ -88,7 +100,7 @@ export function getUpdates(node: TaskPaperNodeExt): TaskPaperNodeExt[] {
     // does this node have children? if so, act on the children
     if (node.children !== undefined) {
         node.children.forEach((childnode) =>
-            results.push(...getFutureTasks(childnode))
+            results.push(...getUpdates(childnode))
         );
     }
 
@@ -116,24 +128,42 @@ export function getFutureTasks(
         return results;
     }
 
-    /// REGISTERS
     // clone the node
     const newnode = inputnode.clone();
 
-    // #1: recurring, no due date assigned
-    if (newnode.hasTag("recur") && !newnode.hasTag("due")) {
+    // filter for the recurring events (recur OR annual)
+    // that have been done OR don't have a due date
+    if (
+        newnode.hasTag(["recur", "annual"]) &&
+        (!newnode.hasTag("due") || newnode.hasTag("done"))
+    ) {
         // get the updated due date; default to now
-        var due = cleanDate(newnode.tagValue("done") || undefined);
-        due.add(
-            getDaysFromRecurrencePattern(newnode.tagValue("recur"), due),
-            "day"
-        );
+        var due: dayjs.Dayjs = dayjs(""); // intentionally invalid
+
+        if (newnode.hasTag("recur")) {
+            due = cleanDate(newnode.tagValue("done") || undefined);
+            due.add(
+                getDaysFromRecurrencePattern(newnode.tagValue("recur"), due),
+                "day"
+            );
+        }
+        if (newnode.hasTag("annual")) {
+            due = cleanDate(newnode.tagValue("annual")).year(dayjs().year());
+            if (due.isBefore(dayjs())) {
+                due = due.add(1, "year");
+            }
+        }
+
+        // valid due date?
+        if (!due.isValid()) {
+            return results;
+        }
 
         // set the updated due date
         newnode.setTag("due", due.format("YYYY-MM-DD"));
 
         // remove the recur flag from the current location
-        inputnode.removeTag("recur");
+        inputnode.removeTag(["recur", "annual"]);
 
         // if there's a @done, flag this item to be updated in its current location;
         // otherwise, flag this item to be deleted from its current location
@@ -149,51 +179,6 @@ export function getFutureTasks(
 
     return results;
 }
-
-// // Returns tasks that have a recurrence flag
-// export function getTasksNeedingUpdate(
-//     node: TaskPaperNodeExt
-// ): TaskPaperNodeExt[] {
-//     const results = new Array<TaskPaperNodeExt>();
-
-//     // does this node have children? if so, act on the children
-//     if (node.children !== undefined) {
-//         node.children.forEach((childnode) =>
-//             results.push(...getTasksNeedingUpdate(childnode))
-//         );
-//     }
-
-//     // push any tasks that are due on or before today
-//     if (node.type === "task" && node.hasTag("annual") && !node.hasTag("due")) {
-//         // register for updated due date
-//         var newDueDate = dayjs(""); // invalid date
-
-//         /// annual recurrence
-//         if (node.hasTag("annual")) {
-//             let annual = cleanDate(node.tagValue("annual") || "");
-//             if (annual.isValid()) {
-//                 // get the next annual occurence
-//                 newDueDate = annual.year(dayjs().year());
-//                 if (dayjs().isAfter(newDueDate, "day")) {
-//                     newDueDate = newDueDate.add(1, "year");
-//                 }
-//                 try {
-//                     node.setTag("due", newDueDate.format("YYYY-MM-DD"));
-//                 } catch (error: any) {
-//                     console.log(error.toString());
-//                 }
-//             }
-//         }
-
-//         // if we got a valid due date, push the task onto the due items stack
-//         if (node.hasTag("due")) {
-//             // is this node already present?
-//             results.push(node);
-//         }
-//     }
-
-//     return results;
-// }
 
 export function removeDuplicates(
     nodeList: TaskPaperNodeExt[],
