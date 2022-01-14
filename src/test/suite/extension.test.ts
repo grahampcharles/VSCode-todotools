@@ -1,6 +1,5 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
-import * as chai from "chai";
 import {
     cleanDate,
     dayNamePluralToWeekday,
@@ -13,17 +12,14 @@ import {
     todayName,
 } from "../../dates";
 import { expect } from "chai";
-import {
-    testDocument,
-    testYaml,
-    testYamlTasks,
-    testYamlTasks2,
-    testYamlToday,
-} from "./testdata";
-import { Settings } from "../../Settings";
-import dayjs = require("dayjs");
+import { testDocument } from "./testdata";
 import taskparse = require("taskpaper");
-import { stringToLines, stripTrailingWhitespace } from "../../strings";
+import {
+    getSectionLineNumber,
+    SectionBounds,
+    stringToLines,
+    stripTrailingWhitespace,
+} from "../../strings";
 import { TagWithValue } from "../../TagWithValue";
 import { TaskPaperNode } from "../../types";
 
@@ -37,6 +33,13 @@ suite("Extension Test Suite", () => {
 
         const date2 = cleanDate("22-01-13 13:45");
         expect(date2.format("YYYY-MM-DD HH:mm")).eq("2022-01-13 13:45");
+    });
+
+    test("getSectionLineNumber", () => {
+        const section = ["Project:", "\t-item", "", "Future:"];
+        const bounds: SectionBounds = getSectionLineNumber(section, "Future");
+        expect(bounds).to.have.property("first").eql(3);
+        expect(bounds).to.have.property("last").eql(-1);
     });
 
     test("date functions", () => {
@@ -87,6 +90,16 @@ suite("Extension Test Suite", () => {
         expect(stringToLines(`test\r\ntest2`)).to.have.lengthOf(
             2,
             "stringToLines, \\r\\n"
+        );
+
+        const section = ["Project:", "\t-item", "", "Future:"];
+        expect(stringToLines(section.join("\r\n"))).to.have.lengthOf(
+            4,
+            "string to lines CRLF, with empty"
+        );
+        expect(stringToLines(section.join("\n"))).to.have.lengthOf(
+            4,
+            "string to lines LF, with empty"
         );
     });
 

@@ -12,32 +12,32 @@ The copy-to-Today could be optional; could also copy in place to the same projec
 
 ## Current Development Path
 
-Rather than using YAML, items will have various flags for creating their recurrence patterns.
+Items have flags that set their recurrence patterns.
 
 ```
-Today:
-- item 1 recur(2)
-- item 2 @done(2020-01-03) @recur(2)
-
-Future:
-- item 3 @due(2020-01-04)
-- item 4 @annual(11/1)
+- item #1 @recur(2)                       # Due date of today + 2 days set; item moved to Future section.
+- item #2 @recur(2) @due(anything)        # No change.
+- item #3 @done(2020-01-03) @recur(2)     # Due date of done + 2 days set; copied to Future section without @done, @recur flag removed from local copy.
+- item #4 @done(2020-01-03) @annual(11/1) # Copied to Future section without @done, @recur flag removed.
+- item #5 @annual(11/1) @due(anything)    # No change.
+- item #6 @annual(11/1)                   # Due date of the next 11/1/YYYY set.
+- item #7 @due(2020-01-04) (no @done)     # Unless already in Today, moved to today.
 ```
 
-If today's date is 1/4/2020, then:
+Items are processed in this order:
 
--   item 2 will be _copied_ to the Future section with the @done() removed and @due set to 1/5/2020
--   item 3 will be _moved_ to Today
--   item 4 will have a due date of the next 11/1 set
-
-So, TODO:
-
-1. Any item that is @done and also has a recurrence tag will be regenerated into the Future project
-   with the next @due date; also, the @recur will be taken off the original one. For completeness, the tags
-   @project, @lasted, @started, and @done will be removed.
-2. Items that are in the Future project and also @due will be moved to the Today project.
+1. Everything is checked for all of the above conditions except #7, creating an accumulator for "new Future" items.
+2. New future items are inserted into Future.
+3. Everything that isn't in today is checked for #7, creating an accumulator for "new Today" items.
+4. New today items are inserted into Today.
 
 ## Extension Settings
+
+For now, this process only runs if there is a Settings project with this format:
+
+```Settings:
+   - Recurring: true
+```
 
 None in the settings file at the moment.
 

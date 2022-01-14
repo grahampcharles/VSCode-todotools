@@ -4,18 +4,16 @@ import { Settings } from "./Settings";
 import dayjs = require("dayjs");
 import { getSection } from "./taskpaper-utils";
 import {
-    getSectionLineNumber,
     deleteLine,
     addLinesToSection,
     replaceLine,
+    editorLines,
 } from "./texteditor-utils";
-import { stringToLines } from "./strings";
+import { getSectionLineNumber, stringToLines } from "./strings";
 import {
-    getDueTasks,
     getFutureTasks,
-    getTasksNeedingUpdate,
+    getUpdates,
     parseTaskDocument,
-    removeDuplicates,
 } from "./taskpaperDocument";
 import { TaskPaperNodeExt } from "./TaskPaperNodeExt";
 
@@ -123,7 +121,12 @@ export function activate(context: vscode.ExtensionContext) {
         textEditor: vscode.TextEditor
     ): Promise<boolean> {
         // find the today line number
-        if (!(getSectionLineNumber(textEditor, "Today") === undefined)) {
+        if (
+            !(
+                getSectionLineNumber(editorLines(textEditor), "Today") ===
+                undefined
+            )
+        ) {
             // no point going on if there's no Today section
             // TODO: *create* a Today section?
 
@@ -140,88 +143,76 @@ export function activate(context: vscode.ExtensionContext) {
 
             // 1. copy FUTURE tasks to Future
             ////////////////////////////////////
-            var newFutures = new Array<string>();
+            var futureTasks = getFutureTasks(items);
+            var futureString = futureTasks.map((node) => node.toString());
 
-            // TODO: this mutuates the Items node, and probably shouldn't
-            var recurring = getFutureTasks(items);
+            // Process any updates and deletes, in reverse order of line
+            // returns a flat map of only nodes that require an update
+            var updates = getUpdates(items).sort(
+                (nodeA, nodeB) => nodeB.index.line - nodeA.index.line
+            );
 
-            // remove anything that's already in the items
-            const futureTasks = removeDuplicates(recurring, items);
-
-            // add future tasks
-            for (const task of futureTasks) {
-                // update current line by removing recurrence flags
-                await replaceLine(
-                    textEditor,
-                    task.index.line,
-                    task.toString(["recur", "annual"])
-                );
-
-                // create future task
-                newFutures.push(
-                    task.toString(["done", "project", "lasted", "started"])
-                );
+            for (const updateNode of updates) {
+                if (updateNode.tagValue("action") === "DELETE") {
+                    // delete the line
+                    await deleteLine(textEditor, updateNode.index.line);
+                }
+                if (updateNode.tagValue("action") === "UPDATE") {
+                    // replace the line
+                    await replaceLine(
+                        textEditor,
+                        updateNode.index.line,
+                        updateNode.toString(["action"])
+                    );
+                }
             }
 
+            /// 3. ADD FUTURES
             // remove anything that's already in the future section,
             // and unduplicate
-            newFutures = newFutures
+            futureString = futureString
                 .filter((v) => !future.includes(v))
                 .filter((v, i, a) => a.indexOf(v) === i);
 
             // add futures
-            await addLinesToSection(textEditor, "Future", newFutures);
+            await addLinesToSection(textEditor, "Future", futureString);
 
-            // 2. move DUE tasks to Today
-            ///////////////////////////////
+            // // 2. move DUE tasks to Today
+            // ///////////////////////////////
 
-            items = await parseTaskDocument(textEditor);
-            if (items === undefined) {
-                return false;
-            }
+            // items = await parseTaskDocument(textEditor);
+            // if (items === undefined) {
+            //     return false;
+            // }
 
-            // get due items
-            const due = getDueTasks(items);
-            const adds = new Array<string>();
-            const deletes = new Array<number>();
+            // // get due items
+            // const due = getDueTasks(items);
+            // const adds = new Array<string>();
+            // const deletes = new Array<number>();
 
-            due.forEach((item) => {
-                // clear extraneous tags
-                item.removeTag(["project", "lasted", "started", "done"]);
-                // set to depth 2 (only top-level Today is allowed)
-                item.depth = 2;
-                // add task
-                adds.push(item.toString());
-                // delete line
-                deletes.push(item.index.line);
-            });
+            // due.forEach((item) => {
+            //     // clear extraneous tags
+            //     item.removeTag(["project", "lasted", "started", "done"]);
+            //     // set to depth 2 (only top-level Today is allowed)
+            //     item.depth = 2;
+            //     // add task
+            //     adds.push(item.toString());
+            //     // delete line
+            //     deletes.push(item.index.line);
+            // });
 
-            // delete all the lines, starting from the highest-numbered
-            for (const line of deletes.sort((a, b) => b - a)) {
-                await deleteLine(textEditor, line);
-            }
+            // // delete all the lines, starting from the highest-numbered
+            // for (const line of deletes.sort((a, b) => b - a)) {
+            //     await deleteLine(textEditor, line);
+            // }
 
-            // add all the new lines
-            const linesToAdd = adds.map((add) => {
-                return add.toString();
-            });
+            // // add all the new lines
+            // const linesToAdd = adds.map((add) => {
+            //     return add.toString();
+            // });
 
-            // insert the lines
-            await addLinesToSection(textEditor, "Today", linesToAdd);
-
-            /// 3. Update tasks
-            //////////////////////
-
-            items = await parseTaskDocument(textEditor);
-            if (items === undefined) {
-                return false;
-            }
-
-            // tasks to update
-            const updateTasks = getTasksNeedingUpdate(items);
-            for (const task of updateTasks) {
-                await replaceLine(textEditor, task.index.line, task.toString());
-            }
+            // // insert the lines
+            // await addLinesToSection(textEditor, "Today", linesToAdd);
         }
 
         // nothing to execute: return true

@@ -1,17 +1,18 @@
 import * as vscode from "vscode";
-import { yamlDelimiter } from "./constants";
-import { isSectionHead } from "./taskpaper-utils";
+import { getSectionLineNumber, SectionBounds, stringToLines } from "./strings";
 
-type SectionBounds = {
-    first: number;
-    last: number;
-};
+export function editorLines(editor: vscode.TextEditor): string[] {
+    return stringToLines(editor.document.getText());
+}
 
 export function clearSection(
     editor: vscode.TextEditor,
     fromSection: string
 ): Thenable<boolean> {
-    const lineRange: SectionBounds = getSectionLineNumber(editor, fromSection);
+    const lineRange: SectionBounds = getSectionLineNumber(
+        editorLines(editor),
+        fromSection
+    );
 
     if (lineRange.last !== -1) {
         var range = new vscode.Range(lineRange.first, 0, lineRange.last, 0);
@@ -34,47 +35,49 @@ export function deleteLine(
     return vscode.workspace.applyEdit(edit);
 }
 
-export function getSectionLineNumber(
-    editor: vscode.TextEditor,
-    sectionName: string
-): SectionBounds {
-    let isInSection = false;
-    let ret: SectionBounds = { first: -1, last: -1 };
-
-    for (let i: number = 0; i < editor.document.lineCount; i++) {
-        if (isSectionHead(editor.document.lineAt(i).text) === sectionName) {
-            ret.first = i + 1;
-            isInSection = true;
-        } else if (
-            isInSection &&
-            (isSectionHead(editor.document.lineAt(i).text) ||
-                editor.document.lineAt(i).text === yamlDelimiter)
-        ) {
-            ret.last = i - 1;
-            return ret;
-        } else if (isInSection) {
-            ret.last = i;
-        }
-    }
-
-    return ret;
-}
-
 export async function addLinesToSection(
     textEditor: vscode.TextEditor,
     section: string,
     lines: string[]
 ): Promise<boolean> {
     if (lines.length === 0) {
+        // nothing to add
         return true;
     }
-    const lineStart = getSectionLineNumber(textEditor, section).first;
+
+    // get the section
+    const textToEdit = editorLines(textEditor);
+
+    let line: number,
+        character: number = 0;
+
+    // get the first line of the section
+    let lineStart = getSectionLineNumber(textToEdit, section).first;
+    line = lineStart + 1;
+
+    // special case 1: the project name is
+    // the last line of the document => set position to end and add a LF
+    if (lineStart === textToEdit.length - 1) {
+        line = lineStart;
+        character = textToEdit[line].length;
+        lines.unshift("");
+    }
+
+    // special case 2: the section doesn't exist => create it at the end, after two newlines
+    if (lineStart === -1) {
+        line = textToEdit.length;
+        character = textToEdit[line - 1].length;
+        lines.unshift(`${section}:`); // section name
+        lines.unshift(""); // two newline
+        lines.unshift(""); // two newline
+    }
+
     const edit = new vscode.WorkspaceEdit();
 
     lines.push(""); // add a newline after
     edit.insert(
         textEditor.document.uri,
-        new vscode.Position(lineStart, 0),
+        new vscode.Position(line, character),
         lines.join("\n")
     );
     return vscode.workspace.applyEdit(edit);

@@ -1,0 +1,11 @@
+Today:
+	- item #1 @recur(2)
+	- item #2 @recur(2) @due(anything)
+	- item #3 @done(2020-01-03) @recur(2)
+	- item #4 @done(2020-01-03) @annual(11/1)
+	- item #5 @annual(11/1) @due(anything)
+	- item #6 @annual(11/1)
+
+Future:
+	- an item
+	- another item

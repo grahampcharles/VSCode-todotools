@@ -75,3 +75,28 @@ export function daysUntilWeekday(
     }
     return days;
 }
+
+export function getDaysFromRecurrencePattern(
+    recur: string | undefined,
+    fromday: dayjs.Dayjs = dayjs()
+): number {
+    // what's the new due date?
+    if (recur === undefined) {
+        return 1;
+    } // default
+    var days = parseInt(recur);
+
+    if (isNaN(days)) {
+        //// NON-NUMERIC recurrence patterns
+
+        // pattern 1: day of the week, pluralized
+        var test = dayNamePluralToWeekday(recur);
+        if (test !== -1) {
+            // set to be due on the next day of that name
+            return daysUntilWeekday(test, fromday);
+        }
+    }
+
+    // default: recur every day
+    return isNaN(days) ? 1 : days;
+}
