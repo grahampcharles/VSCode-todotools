@@ -5,9 +5,12 @@ All notable changes to the "todotools" extension will be documented in this file
 
 ## ToDo - Unreleased
 
+## [0.4.1] - 2022-01-14:
+
 ### fixed
 
 -   completed @annual items should be copied back into the @future section
+-   various parser errors
 
 ## [0.4.0] - 2022-01-12:
 
