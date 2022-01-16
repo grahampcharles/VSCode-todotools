@@ -11,6 +11,7 @@ All notable changes to the "todotools" extension will be documented in this file
 
 -   completed @annual items should be copied back into the @future section
 -   various parser errors
+-   recurrence pattern always produces today
 
 ## [0.4.0] - 2022-01-12:
 

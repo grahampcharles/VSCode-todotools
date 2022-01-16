@@ -142,7 +142,7 @@ export function getFutureTasks(
 
         if (newnode.hasTag("recur")) {
             due = cleanDate(newnode.tagValue("done") || undefined);
-            due.add(
+            due = due.add(
                 getDaysFromRecurrencePattern(newnode.tagValue("recur"), due),
                 "day"
             );

@@ -18,7 +18,7 @@ Items have flags that set their recurrence patterns.
 - item #1 @recur(2)                       # Due date of today + 2 days set; item moved to Future section.
 - item #2 @recur(2) @due(anything)        # No change.
 - item #3 @done(2020-01-03) @recur(2)     # Due date of done + 2 days set; copied to Future section without @done, @recur flag removed from local copy.
-- item #4 @done(2020-01-03) @annual(11/1) # Copied to Future section without @done, @recur flag removed.
+- item #4 @done(2020-01-03) @annual(11/1) # Copied to Future section without @done, @annual flag removed.
 - item #5 @annual(11/1) @due(anything)    # No change.
 - item #6 @annual(11/1)                   # Due date of the next 11/1/YYYY set.
 - item #7 @due(2020-01-04) (no @done)     # Unless already in Today, moved to today.
