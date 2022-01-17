@@ -14,7 +14,8 @@ import {
 } from "../../dates";
 import { expect } from "chai";
 import { testDocument } from "./testdata";
-import taskparse = require("taskpaper");
+import taskpaperParse = require("taskpaper");
+
 import {
     getSectionLineNumber,
     SectionBounds,
@@ -148,7 +149,7 @@ suite("Extension Test Suite", () => {
 
     test("parseTagDocument", () => {
         const doc = testDocument;
-        const parsed = taskparse(doc);
+        const parsed = taskpaperParse(doc);
 
         expect(parsed).to.have.property("children");
         expect(parsed.children).to.have.lengthOf(2, "children length");

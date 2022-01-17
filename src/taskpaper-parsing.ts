@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import taskparser = require("taskpaper");
+import taskpaperParse = require("taskpaper");
 import dayjs = require("dayjs");
 import utc = require("dayjs/plugin/utc");
 import timezone = require("dayjs/plugin/timezone");
@@ -31,7 +31,7 @@ export async function parseTaskDocument(
         const text = editor.document.getText();
         // TODO: update parser to ignore trailing whitespace
         const cleaned = stripTrailingWhitespace(text);
-        const parsed = taskparser(cleaned);
+        const parsed = taskpaperParse(cleaned);
         return new TaskPaperNodeExt(parsed);
     } catch (error: any) {
         // report error to user

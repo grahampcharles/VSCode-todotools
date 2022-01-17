@@ -18,7 +18,6 @@ import {
     parseTaskDocument,
 } from "./taskpaper-parsing";
 import { TaskPaperNodeExt } from "./TaskPaperNodeExt";
-import { arch } from "os";
 
 let settings: Settings = new Settings();
 let consoleChannel = vscode.window.createOutputChannel("ToDoTools");

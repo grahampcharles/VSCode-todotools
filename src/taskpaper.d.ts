@@ -13,6 +13,6 @@ declare module "taskpaper" {
         offset: number;
     };
 
-    function parse(inputString: string): TaskPaperNode;
-    export = parse;
+    function taskpaperParse(inputString: string): TaskPaperNode;
+    export = taskpaperParse;
 }
