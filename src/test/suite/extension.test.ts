@@ -24,6 +24,8 @@ import {
 import { TagWithValue } from "../../TagWithValue";
 import { TaskPaperNode } from "../../types";
 import dayjs = require("dayjs");
+import { TaskPaperNodeExt } from "../../TaskPaperNodeExt";
+import { getDoneTasks } from "../../taskpaper-parsing";
 
 suite("Extension Test Suite", () => {
     vscode.window.showInformationMessage("Start all tests.");
@@ -45,6 +47,35 @@ suite("Extension Test Suite", () => {
     test("getDaysFromRecurrencePattern", () => {
         expect(getDaysFromRecurrencePattern("2")).to.eql(2, "in two days");
         expect(getDaysFromRecurrencePattern(undefined)).to.eql(1, "undefined");
+    });
+
+    test("getDoneTasks", () => {
+        const source = {
+            type: "document",
+            children: [
+                { type: "project", value: "Today", depth: 1 } as TaskPaperNode,
+                {
+                    type: "task",
+                    value: "item 1",
+                    depth: 2,
+                    tags: ["due(whenever)"],
+                } as TaskPaperNode,
+                {
+                    type: "task",
+                    value: "item 2",
+                    depth: 2,
+                    tags: ["done(2022-01-16)"],
+                } as TaskPaperNode,
+            ],
+        } as TaskPaperNode;
+        const node = new TaskPaperNodeExt(source);
+        const done = getDoneTasks(node);
+
+        expect(done).to.have.lengthOf(1, "parsed done tasks");
+        expect(done[0].tagValue("project")).to.eq(
+            "Today",
+            "parsed project name from tree"
+        );
     });
 
     test("getSectionLineNumber", () => {

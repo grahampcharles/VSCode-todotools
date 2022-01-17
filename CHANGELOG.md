@@ -2,8 +2,19 @@
 
 All notable changes to the "todotools" extension will be documented in this file.
 ( Added, Changed, Deprecated, Removed, Fixed, Security)
+1
 
-## ToDo - Unreleased
+## Unreleased
+
+### added
+
+-   syntax highlighting
+
+## [0.4.3] - 2022-01-16
+
+### added
+
+-   moves items to the Archive project as well
 
 ## [0.4.1] - 2022-01-14:
 

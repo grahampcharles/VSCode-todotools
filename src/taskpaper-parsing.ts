@@ -1,11 +1,3 @@
-/*
-    taskpaper tags:
-        - item @recur(3)            : recur three days after it last completed
-        - item @due(date)           : move to Today on this date
-        - item @weekday(Wednesday)  : occur every Wednesday
-
-*/
-
 import * as vscode from "vscode";
 import taskparser = require("taskpaper");
 import dayjs = require("dayjs");
@@ -89,6 +81,55 @@ export function getDueTasks(node: TaskPaperNodeExt): TaskPaperNodeExt[] {
         // set the task to be erased
         node.setTag("action", "DELETE");
     }
+
+    return results;
+}
+
+export function getDoneTasks(
+    node: TaskPaperNodeExt,
+    projectName: string[] = []
+): TaskPaperNodeExt[] {
+    const results = new Array<TaskPaperNodeExt>();
+
+    // don't act on a top-level Archive project
+    if (
+        node.type === "project" &&
+        node.value?.toLowerCase() === "archive" &&
+        node.depth === 1
+    ) {
+        return results;
+    }
+
+    // does this node have children? if so, act on the children
+    if (node.children !== undefined) {
+        // add the project name to the parser
+        if (node.type === "project") {
+            projectName.push(node.value || "Untitled Project");
+        }
+        node.children.forEach((childnode) =>
+            results.push(...getDoneTasks(childnode, projectName))
+        );
+    }
+
+    // only act on done tasks
+    if (!(node.type === "task" && node.hasTag("done"))) {
+        return results;
+    }
+
+    // return a clone of the task
+    const newnode = node.clone();
+
+    // add a project metatag (unless it already has one)
+    if (!newnode.hasTag("project")) {
+        newnode.setTag("project", projectName.join("."));
+    }
+
+    // force all "Archive" nodes to depth 2
+    newnode.depth = 2;
+    results.push(newnode);
+
+    // set the task to be erased
+    node.setTag("action", "DELETE");
 
     return results;
 }

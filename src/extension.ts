@@ -11,12 +11,14 @@ import {
 } from "./texteditor-utils";
 import { getSectionLineNumber, stringToLines } from "./strings";
 import {
+    getDoneTasks,
     getDueTasks,
     getFutureTasks,
     getUpdates,
     parseTaskDocument,
-} from "./taskpaperDocument";
+} from "./taskpaper-parsing";
 import { TaskPaperNodeExt } from "./TaskPaperNodeExt";
+import { arch } from "os";
 
 let settings: Settings = new Settings();
 let consoleChannel = vscode.window.createOutputChannel("ToDoTools");
@@ -121,6 +123,8 @@ export function activate(context: vscode.ExtensionContext) {
     async function performCopy(
         textEditor: vscode.TextEditor
     ): Promise<boolean> {
+        const archiveItems = true;
+
         // find the today line number
         if (
             !(
@@ -150,7 +154,7 @@ export function activate(context: vscode.ExtensionContext) {
             // process any updates
             await processUpdates(items, textEditor);
 
-            /// 3. ADD FUTURES
+            /// 2. ADD FUTURES
             // remove anything that's already in the future section,
             // and unduplicate
             futureString = futureString
@@ -160,8 +164,8 @@ export function activate(context: vscode.ExtensionContext) {
             // add futures
             await addLinesToSection(textEditor, "Future", futureString);
 
-            // // 2. move DUE tasks to Today
-            // ///////////////////////////////
+            // 3. move DUE tasks to Today
+            ///////////////////////////////
 
             // re-parse document to account for changes in part 1
             items = await parseTaskDocument(textEditor);
@@ -182,6 +186,30 @@ export function activate(context: vscode.ExtensionContext) {
                 "Today",
                 due.map((item) => item.toString())
             );
+
+            // 4. move DONE tasks to Archive
+            /////////////////////////////////
+
+            if (archiveItems) {
+                // re-parse document to account for changes in part 1
+                items = await parseTaskDocument(textEditor);
+                if (items === undefined) {
+                    return false;
+                }
+
+                // get done items
+                const done = getDoneTasks(items);
+
+                // process any node updates
+                await processUpdates(items, textEditor);
+
+                // add the new lines to the Archive section
+                await addLinesToSection(
+                    textEditor,
+                    "Archive",
+                    done.map((item) => item.toString())
+                );
+            }
         }
 
         // nothing to execute: return true

@@ -10,7 +10,13 @@ export class TaskPaperNodeExt {
     depth: number;
     index: TaskPaperIndex;
 
-    constructor(v: TaskPaperNode | TaskPaperNodeExt) {
+    constructor(v: TaskPaperNode | TaskPaperNodeExt | string) {
+        if (typeof v === "string") {
+            this.type = v;
+            this.depth = 0;
+            this.index = { line: 0, column: 0 } as TaskPaperIndex;
+            return;
+        }
         this.type = v.type;
         this.value = v.value;
         this.tags = v.tags;
