@@ -1,4 +1,4 @@
-import dayjs = require("dayjs");
+import dayjs from "dayjs";
 
 export const testDocument = `Today:
 	- every Saturday test

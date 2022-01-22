@@ -11,27 +11,21 @@ import {
     monthNameToNumber,
     todayDay,
     todayName,
-} from "../../dates";
+} from "../src/dates";
 import { expect } from "chai";
-import { testDocument } from "./testdata";
-import taskpaperParse = require("taskpaper");
-
 import {
     getSectionLineNumber,
     SectionBounds,
     stringToLines,
     stripTrailingWhitespace,
-} from "../../strings";
-import { TagWithValue } from "../../TagWithValue";
-import { TaskPaperNode } from "../../types";
-import dayjs = require("dayjs");
-import { TaskPaperNodeExt } from "../../TaskPaperNodeExt";
-import { getDoneTasks } from "../../taskpaper-parsing";
+} from "../src/strings";
+import { getDoneTasks } from "../src/taskpaper-parsing";
+import { TaskPaperNode } from "task-parser/src/TaskPaperNode";
 
-suite("Extension Test Suite", () => {
+describe("Extension Test Suite", () => {
     vscode.window.showInformationMessage("Start all tests.");
 
-    test("clean date", () => {
+    it("clean date", () => {
         const date1 = cleanDate("1/11");
         expect(date1.year()).eq(2001);
         expect(date1.format("YYYY-MM-DD")).eq(`2001-01-11`);
@@ -45,12 +39,12 @@ suite("Extension Test Suite", () => {
         );
     });
 
-    test("getDaysFromRecurrencePattern", () => {
+    it("getDaysFromRecurrencePattern", () => {
         expect(getDaysFromRecurrencePattern("2")).to.eql(2, "in two days");
         expect(getDaysFromRecurrencePattern(undefined)).to.eql(1, "undefined");
     });
 
-    test("getDoneTasks", () => {
+    it("getDoneTasks", () => {
         const source = {
             type: "document",
             children: [
@@ -59,18 +53,17 @@ suite("Extension Test Suite", () => {
                     type: "task",
                     value: "item 1",
                     depth: 2,
-                    tags: ["due(whenever)"],
+                    tags: [{ tag: "due", value: "whenever" }],
                 } as TaskPaperNode,
                 {
                     type: "task",
                     value: "item 2",
                     depth: 2,
-                    tags: ["done(2022-01-16)"],
+                    tags: [{ tag: "done", value: "2022-01-10" }],
                 } as TaskPaperNode,
             ],
         } as TaskPaperNode;
-        const node = new TaskPaperNodeExt(source);
-        const done = getDoneTasks(node);
+        const done = getDoneTasks(source);
 
         expect(done).to.have.lengthOf(1, "parsed done tasks");
         expect(done[0].tagValue("project")).to.eq(
@@ -79,14 +72,14 @@ suite("Extension Test Suite", () => {
         );
     });
 
-    test("getSectionLineNumber", () => {
+    it("getSectionLineNumber", () => {
         const section = ["Project:", "\t-item", "", "Future:"];
         const bounds: SectionBounds = getSectionLineNumber(section, "Future");
         expect(bounds).to.have.property("first").eql(3);
         expect(bounds).to.have.property("last").eql(-1);
     });
 
-    test("date functions", () => {
+    it("date functions", () => {
         const date1 = new Date(2020, 1, 3);
         const date2 = new Date(2020, 1, 5);
         assert.strictEqual(2, daysPassed(date1, date2));
@@ -122,7 +115,7 @@ suite("Extension Test Suite", () => {
         expect(daysUntilWeekday(0, day)).to.equal(5, "until Sunday");
     });
 
-    test("string utilities", () => {
+    it("string utilities", () => {
         expect(stringToLines(`test\ntest2`)).to.have.lengthOf(
             2,
             "stringToLines, \\n"
@@ -147,63 +140,9 @@ suite("Extension Test Suite", () => {
         );
     });
 
-    test("parseTagDocument", () => {
-        const doc = testDocument;
-        const parsed = taskpaperParse(doc);
-
-        expect(parsed).to.have.property("children");
-        expect(parsed.children).to.have.lengthOf(2, "children length");
-        const child0 = (parsed.children ?? [{} as TaskPaperNode])[0];
-        expect(child0 ?? {})
-            .to.have.property("type")
-            .eql("project");
-        expect(child0 ?? {})
-            .to.have.property("value")
-            .eql("Today");
-
-        const todayProject = child0.children || [{} as TaskPaperNode];
-        expect(todayProject).to.have.lengthOf(2, "today length");
-    });
-
-    test("stripTrailingWhitespace", () => {
+    it("stripTrailingWhitespace", () => {
         const test = `line 1\nline 2\t\nline 3  \n\nline 4`;
         const result = stripTrailingWhitespace(test);
         expect(result).eq(`line 1\nline 2\nline 3\n\nline 4`);
-    });
-
-    test("TagWithValue", () => {
-        const tag1 = new TagWithValue("simpletag");
-        expect(tag1).to.have.property("tag").eql("simpletag");
-
-        const tag2 = new TagWithValue("due(2022-01-01)");
-        expect(tag2).to.have.property("tag").eql("due");
-        expect(tag2).to.have.property("value").eql("2022-01-01");
-
-        // array of TagWithValue
-        const parse3 = [
-            new TagWithValue("test1", "value1"),
-            new TagWithValue("test2", "value2"),
-        ];
-        expect(parse3).to.have.lengthOf(2, "TagWithValue array");
-        expect(parse3[0] ?? undefined).to.not.eql(
-            undefined,
-            "parse3[0]: defined"
-        );
-        expect(parse3[0] ?? {})
-            .to.have.property("tag")
-            .eql("test1", "parse3[0]: tag");
-        expect(parse3[0] ?? {})
-            .to.have.property("value")
-            .eql("value1", "parse3[0]: value");
-        expect(parse3[1] ?? undefined).to.not.eql(
-            undefined,
-            "parse3[1]: defined"
-        );
-        expect(parse3[1] ?? {})
-            .to.have.property("tag")
-            .eql("test2", "parse3[1]: tag");
-        expect(parse3[1] ?? {})
-            .to.have.property("value")
-            .eql("value2", "parse3[1]: value");
     });
 });

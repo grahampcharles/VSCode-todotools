@@ -1,6 +1,3 @@
-import * as vscode from "vscode";
-import dayjs = require("dayjs");
-
 export class Settings {
     runOnOpen: boolean = false;
     runDaily: boolean = false;

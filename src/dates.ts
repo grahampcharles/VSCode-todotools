@@ -1,9 +1,9 @@
 // days of the week
-import dayjs = require("dayjs");
-import utc = require("dayjs/plugin/utc");
-import timezone = require("dayjs/plugin/timezone");
-import localedata = require("dayjs/plugin/localeData");
-import customParseFormat = require("dayjs/plugin/customParseFormat");
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+import localedata from "dayjs/plugin/localeData";
+import customParseFormat from "dayjs/plugin/customParseFormat";
 
 // extend the parse formatter
 dayjs.extend(customParseFormat);

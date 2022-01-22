@@ -1,10 +1,12 @@
 import * as vscode from "vscode";
-import taskpaperParse = require("taskpaper");
-import dayjs = require("dayjs");
-import utc = require("dayjs/plugin/utc");
-import timezone = require("dayjs/plugin/timezone");
-import isSameOrBefore = require("dayjs/plugin/isSameOrBefore");
-import { TaskPaperNodeExt } from "./TaskPaperNodeExt";
+
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+
+import { TaskPaperNode } from "task-parser/src/TaskPaperNode";
+
 import { stripTrailingWhitespace } from "./strings";
 import { cleanDate, getDaysFromRecurrencePattern } from "./dates";
 
@@ -25,14 +27,10 @@ dayjs.extend(isSameOrBefore);
  */
 export async function parseTaskDocument(
     editor: vscode.TextEditor
-): Promise<TaskPaperNodeExt | undefined> {
+): Promise<TaskPaperNode | undefined> {
     // parse the taskpaper again if possible
     try {
-        const text = editor.document.getText();
-        // TODO: update parser to ignore trailing whitespace
-        const cleaned = stripTrailingWhitespace(text);
-        const parsed = taskpaperParse(cleaned);
-        return new TaskPaperNodeExt(parsed);
+        return ParseTaskPaper(editor.document.getText());
     } catch (error: any) {
         // report error to user
         await vscode.window.showInformationMessage(error.toString());
@@ -44,18 +42,18 @@ export async function parseTaskDocument(
  *Returns all tasks that are @due today or earlier, not @done, and not in "Today"
  *
  * @export
- * @param {TaskPaperNodeExt} node
- * @return {*}  {TaskPaperNodeExt[]}
+ * @param {TaskPaperNode} node
+ * @return {*}  {TaskPaperNode[]}
  */
-export function getDueTasks(node: TaskPaperNodeExt): TaskPaperNodeExt[] {
-    const results = new Array<TaskPaperNodeExt>();
+export function getDueTasks(node: TaskPaperNode): TaskPaperNode[] {
+    const results = new Array<TaskPaperNode>();
 
     // does this node have children? if so, act on the children
     // but skip the Today project
     if (!(node.type === "project" && node.value?.toLowerCase() === "today")) {
         if (node.children !== undefined) {
-            node.children.forEach((childnode) =>
-                results.push(...getDueTasks(childnode))
+            node.children.forEach((childNode) =>
+                results.push(...getDueTasks(childNode))
             );
         }
     }
@@ -71,12 +69,12 @@ export function getDueTasks(node: TaskPaperNodeExt): TaskPaperNodeExt[] {
         cleanDate(node.tagValue("due")).isSameOrBefore(dayjs(), "day")
     ) {
         // return a clone of the task
-        const newnode = node.clone();
+        const newNode = node.clone();
         // clear metatags relating to task completion
-        newnode.removeTag(["project", "lasted", "started"]);
+        newNode.removeTag(["project", "lasted", "started"]);
         // force all "Today" nodes to depth 2
-        newnode.depth = 2;
-        results.push(newnode);
+        newNode.depth = 2;
+        results.push(newNode);
 
         // set the task to be erased
         node.setTag("action", "DELETE");
@@ -86,10 +84,10 @@ export function getDueTasks(node: TaskPaperNodeExt): TaskPaperNodeExt[] {
 }
 
 export function getDoneTasks(
-    node: TaskPaperNodeExt,
+    node: TaskPaperNode,
     projectName: string[] = []
-): TaskPaperNodeExt[] {
-    const results = new Array<TaskPaperNodeExt>();
+): TaskPaperNode[] {
+    const results = new Array<TaskPaperNode>();
 
     // don't act on a top-level Archive project
     if (
@@ -106,8 +104,8 @@ export function getDoneTasks(
         if (node.type === "project") {
             projectName.push(node.value || "Untitled Project");
         }
-        node.children.forEach((childnode) =>
-            results.push(...getDoneTasks(childnode, projectName))
+        node.children.forEach((childNode) =>
+            results.push(...getDoneTasks(childNode, projectName))
         );
     }
 
@@ -117,16 +115,16 @@ export function getDoneTasks(
     }
 
     // return a clone of the task
-    const newnode = node.clone();
+    const newNode = node.clone();
 
     // add a project metatag (unless it already has one)
-    if (!newnode.hasTag("project")) {
-        newnode.setTag("project", projectName.join("."));
+    if (!newNode.hasTag("project")) {
+        newNode.setTag("project", projectName.join("."));
     }
 
     // force all "Archive" nodes to depth 2
-    newnode.depth = 2;
-    results.push(newnode);
+    newNode.depth = 2;
+    results.push(newNode);
 
     // set the task to be erased
     node.setTag("action", "DELETE");
@@ -135,14 +133,12 @@ export function getDoneTasks(
 }
 
 // Returns tasks that have an action flag set
-export function getUpdates(node: TaskPaperNodeExt): TaskPaperNodeExt[] {
-    const results = new Array<TaskPaperNodeExt>();
+export function getUpdates(node: TaskPaperNode): TaskPaperNode[] {
+    const results = new Array<TaskPaperNode>();
 
     // does this node have children? if so, act on the children
     if (node.children !== undefined) {
-        node.children.forEach((childnode) =>
-            results.push(...getUpdates(childnode))
-        );
+        node.children.forEach((child) => results.push(...getUpdates(child)));
     }
 
     if (node.hasTag("action")) {
@@ -152,44 +148,42 @@ export function getUpdates(node: TaskPaperNodeExt): TaskPaperNodeExt[] {
 }
 
 // Returns tasks that have a future recurrence flag
-export function getFutureTasks(
-    inputnode: TaskPaperNodeExt
-): TaskPaperNodeExt[] {
-    const results = new Array<TaskPaperNodeExt>();
+export function getFutureTasks(input: TaskPaperNode): TaskPaperNode[] {
+    const results = new Array<TaskPaperNode>();
 
     // does this node have children? if so, act on the children
-    if (inputnode.children !== undefined) {
-        inputnode.children.forEach((childnode) =>
-            results.push(...getFutureTasks(childnode))
+    if (input.children !== undefined) {
+        input.children.forEach((child) =>
+            results.push(...getFutureTasks(child))
         );
     }
 
     // only further process tasks
-    if (inputnode.type !== "task") {
+    if (input.type !== "task") {
         return results;
     }
 
     // clone the node
-    const newnode = inputnode.clone();
+    const newNode = input.clone();
 
     // filter for the recurring events (recur OR annual)
     // that have been done OR don't have a due date
     if (
-        newnode.hasTag(["recur", "annual"]) &&
-        (!newnode.hasTag("due") || newnode.hasTag("done"))
+        newNode.hasTag(["recur", "annual"]) &&
+        (!newNode.hasTag("due") || newNode.hasTag("done"))
     ) {
         // get the updated due date; default to now
         var due: dayjs.Dayjs = dayjs(""); // intentionally invalid
 
-        if (newnode.hasTag("recur")) {
-            due = cleanDate(newnode.tagValue("done") || undefined);
+        if (newNode.hasTag("recur")) {
+            due = cleanDate(newNode.tagValue("done") || undefined);
             due = due.add(
-                getDaysFromRecurrencePattern(newnode.tagValue("recur"), due),
+                getDaysFromRecurrencePattern(newNode.tagValue("recur"), due),
                 "day"
             );
         }
-        if (newnode.hasTag("annual")) {
-            due = cleanDate(newnode.tagValue("annual")).year(dayjs().year());
+        if (newNode.hasTag("annual")) {
+            due = cleanDate(newNode.tagValue("annual")).year(dayjs().year());
             if (due.isBefore(dayjs())) {
                 due = due.add(1, "year");
             }
@@ -201,32 +195,34 @@ export function getFutureTasks(
         }
 
         // set the updated due date
-        newnode.setTag("due", due.format("YYYY-MM-DD"));
+        newNode.setTag("due", due.format("YYYY-MM-DD"));
 
         // remove the recur flag from the current location
-        inputnode.removeTag(["recur", "annual"]);
+        input.removeTag(["recur", "annual"]);
 
         // if there's a @done, flag this item to be updated in its current location;
         // otherwise, flag this item to be deleted from its current location
-        inputnode.setTag(
-            "action",
-            inputnode.hasTag("done") ? "UPDATE" : "DELETE"
-        );
+        input.setTag("action", input.hasTag("done") ? "UPDATE" : "DELETE");
 
         // copy this item without @done, @lasted, @started
-        newnode.removeTag(["done", "lasted", "started"]);
-        results.push(newnode);
+        newNode.removeTag(["done", "lasted", "started"]);
+        results.push(newNode);
     }
 
     return results;
 }
 
 export function removeDuplicates(
-    nodeList: TaskPaperNodeExt[],
-    masterNode: TaskPaperNodeExt
-): TaskPaperNodeExt[] {
+    nodeList: TaskPaperNode[],
+    masterNode: TaskPaperNode
+): TaskPaperNode[] {
     // removes any items in the nodeList that already exist on the masterNode
     return nodeList.filter((node) => {
         return !masterNode.containsItem(node);
     });
+}
+function ParseTaskPaper(
+    arg0: string
+): TaskPaperNode | PromiseLike<TaskPaperNode | undefined> | undefined {
+    throw new Error("Function not implemented.");
 }

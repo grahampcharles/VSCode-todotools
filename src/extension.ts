@@ -1,14 +1,13 @@
 import * as vscode from "vscode";
 import { autoRunInterval } from "./constants";
 import { Settings } from "./Settings";
-import dayjs = require("dayjs");
 import { getSection } from "./taskpaper-utils";
 import {
     deleteLine,
     addLinesToSection,
     replaceLine,
     editorLines,
-} from "./texteditor-utils";
+} from "./editor-utils";
 import { getSectionLineNumber, stringToLines } from "./strings";
 import {
     getDoneTasks,
@@ -17,7 +16,7 @@ import {
     getUpdates,
     parseTaskDocument,
 } from "./taskpaper-parsing";
-import { TaskPaperNodeExt } from "./TaskPaperNodeExt";
+import { TaskPaperNode } from "task-parser/src/TaskPaperNode";
 
 let settings: Settings = new Settings();
 let consoleChannel = vscode.window.createOutputChannel("ToDoTools");
@@ -51,7 +50,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     // automatic re-run function
     const autoRunFunction = function () {
-        consoleChannel.appendLine("autorun called");
+        consoleChannel.appendLine("auto-run called");
         let textEditor = vscode.window.activeTextEditor;
         if (textEditor) {
             automaticPerformCopy(textEditor);
@@ -60,7 +59,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     // get option for the automatic re-run interval
     if (textEditor) {
-        consoleChannel.appendLine("autorun interval set");
+        consoleChannel.appendLine("auto-run interval set");
         // set the auto-run function to run
         setInterval(autoRunFunction, autoRunInterval);
     }
@@ -138,9 +137,7 @@ export function activate(context: vscode.ExtensionContext) {
             var text = textEditor.document.getText();
             const future = getSection(stringToLines(text), "Future");
 
-            var items: TaskPaperNodeExt | undefined = await parseTaskDocument(
-                textEditor
-            );
+            var items = await parseTaskDocument(textEditor);
             if (items === undefined) {
                 return false;
             }
@@ -155,7 +152,7 @@ export function activate(context: vscode.ExtensionContext) {
 
             /// 2. ADD FUTURES
             // remove anything that's already in the future section,
-            // and unduplicate
+            // and deduplicate
             futureString = futureString
                 .filter((v) => !future.includes(v))
                 .filter((v, i, a) => a.indexOf(v) === i);
@@ -217,7 +214,7 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 async function processUpdates(
-    items: TaskPaperNodeExt,
+    items: TaskPaperNode,
     textEditor: vscode.TextEditor
 ): Promise<boolean> {
     // Process any updates and deletes, in reverse order of line
